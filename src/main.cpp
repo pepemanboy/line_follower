@@ -1,11 +1,14 @@
 #include <Arduino.h>
+#include "line_follower_startup_test.h"
+
+namespace {
+  line_follower::LineFollowerStartupTest robot;
+}  // namespace
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("Setup");
+  robot.Init();
 }
 
 void loop() {
-  Serial.println("Loop");
-  delay(1000);
+  robot.Poll(micros());
 }
