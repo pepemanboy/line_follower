@@ -12,7 +12,7 @@ constexpr int kQtrSensorPins[kNumQtrSensors] = {
 };
 
 constexpr int kCurrentSensorPins[kNumCurrentSensors] = {
-  A15, A14
+  A14, A15
 };
 
 constexpr int kTowerLightRedPin = 45;
@@ -26,11 +26,13 @@ constexpr int kButtonDownPin = 53;
 constexpr int kPistonPlusPin = 37;
 constexpr int kPistonMinusPin = 35;
 
+// MotorDriver 1 is left.
 constexpr int kMotorDriver1LeftPwmPin = 73;
 constexpr int kMotorDriver1RightPwmPin = 72;
 constexpr int kMotorDriver1LeftEnablePin = 74;
 constexpr int kMotorDriver1RightEnablePin = 71;
 
+// MotorDriver2 is right.
 constexpr int kMotorDriver2LeftPwmPin = 75;
 constexpr int kMotorDriver2RightPwmPin = 78;
 constexpr int kMotorDriver2LeftEnablePin = 76;
@@ -38,7 +40,6 @@ constexpr int kMotorDriver2RightEnablePin = 77;
 
 constexpr int kLedGreenPin = 29;
 constexpr int kLedRedPin = 27;
-
 
 } // namespace line_follower
 
