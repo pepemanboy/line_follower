@@ -27,16 +27,16 @@ constexpr int kPistonPlusPin = 37;
 constexpr int kPistonMinusPin = 35;
 
 // MotorDriver 1 is left.
-constexpr int kMotorDriver1LeftPwmPin = 73;
-constexpr int kMotorDriver1RightPwmPin = 72;
-constexpr int kMotorDriver1LeftEnablePin = 74;
-constexpr int kMotorDriver1RightEnablePin = 71;
+constexpr int kMotorDriver1LeftPwmPin = 4;
+constexpr int kMotorDriver1RightPwmPin = 3;
+constexpr int kMotorDriver1LeftEnablePin = 5;
+constexpr int kMotorDriver1RightEnablePin = 2;
 
 // MotorDriver2 is right.
-constexpr int kMotorDriver2LeftPwmPin = 75;
-constexpr int kMotorDriver2RightPwmPin = 78;
-constexpr int kMotorDriver2LeftEnablePin = 76;
-constexpr int kMotorDriver2RightEnablePin = 77;
+constexpr int kMotorDriver2LeftPwmPin = 6;
+constexpr int kMotorDriver2RightPwmPin = 9;
+constexpr int kMotorDriver2LeftEnablePin = 7;
+constexpr int kMotorDriver2RightEnablePin = 8;
 
 constexpr int kLedGreenPin = 29;
 constexpr int kLedRedPin = 27;
