@@ -95,7 +95,7 @@ void SetPiston(PistonState state) {
       break;
     case PistonState::Idle:
       digitalWrite(kPistonPlusPin, LOW);
-      digitalWrite(kPistonPlusPin, LOW);
+      digitalWrite(kPistonMinusPin, LOW);
   }
 }
 
