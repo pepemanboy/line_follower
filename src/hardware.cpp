@@ -73,14 +73,14 @@ bool ReadButton(Button button) {
 
 void SetTowerLight(TowerLight light, bool state) {
   switch (light) {
-    case TowerLight::Red: digitalWrite(kTowerLightRedPin, state); break;
-    case TowerLight::Green: digitalWrite(kTowerLightGreenPin, state); break;
-    case TowerLight::Yellow: digitalWrite(kTowerLightYellowPin, state); break;
+    case TowerLight::Red: digitalWrite(kTowerLightRedPin, !state); break;
+    case TowerLight::Green: digitalWrite(kTowerLightGreenPin, !state); break;
+    case TowerLight::Yellow: digitalWrite(kTowerLightYellowPin, !state); break;
   }
 }
 
 void SetTowerSound(bool state) {
-  digitalWrite(kTowerSoundPin, state);
+  digitalWrite(kTowerSoundPin, !state);
 }
 
 void SetPiston(PistonState state) {
