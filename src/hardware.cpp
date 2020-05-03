@@ -65,8 +65,8 @@ void ReadCurrentSensors(int readings[kNumCurrentSensors]) {
 
 bool ReadButton(Button button) {
   switch(button) {
-    case Button::Up: return digitalRead(kButtonUpPin);
-    case Button::Down: return digitalRead(kButtonDownPin);
+    case Button::Up: return !digitalRead(kButtonUpPin);
+    case Button::Down: return !digitalRead(kButtonDownPin);
   }
   return false;  // Shall never get here.
 }
@@ -96,6 +96,7 @@ void SetPiston(PistonState state) {
     case PistonState::Idle:
       digitalWrite(kPistonPlusPin, LOW);
       digitalWrite(kPistonMinusPin, LOW);
+      break;
   }
 }
 
@@ -103,12 +104,12 @@ void SetMotorPwm(Motor motor, int pwm) {
   int forward_pwm_pin, reverse_pwm_pin;
   switch(motor) {
     case Motor::Left:
-      forward_pwm_pin = kMotorDriver1LeftPwmPin;
-      reverse_pwm_pin = kMotorDriver1RightPwmPin;
+      forward_pwm_pin = kMotorDriver1RightPwmPin;
+      reverse_pwm_pin = kMotorDriver1LeftPwmPin;
       break;
     case Motor::Right:
-      forward_pwm_pin = kMotorDriver2RightPwmPin;
-      reverse_pwm_pin = kMotorDriver2LeftPwmPin;
+      forward_pwm_pin = kMotorDriver2LeftPwmPin;
+      reverse_pwm_pin = kMotorDriver2RightPwmPin;
       break;
   }
 
