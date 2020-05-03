@@ -35,7 +35,7 @@ void HardwareInit() {
   pinMode(kButtonDownPin, INPUT);
 
   pinMode(kPistonPlusPin, OUTPUT);
-  pinMode(kPistonPlusPin, OUTPUT);
+  pinMode(kPistonMinusPin, OUTPUT);
   SetPiston(PistonState::Idle);
 
   pinMode(kMotorDriver1LeftPwmPin, OUTPUT);
