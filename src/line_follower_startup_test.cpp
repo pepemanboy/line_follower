@@ -61,32 +61,39 @@ void LineFollowerStartupTest::Init() {
 
   TestPrompt("Piston up");
   SetPiston(PistonState::Up);
-  delay(3000);
+  delay(5000);
+  SetPiston(PistonState::Idle);
 
   TestPrompt("Piston down");
   SetPiston(PistonState::Down);
-  delay(3000);
+  delay(5000);
   SetPiston(PistonState::Idle);
 
   TestPrompt("Left motor forward");
   EnableMotor(Motor::Left, true);
   SetMotorPwm(Motor::Left, 20);
-  delay(3000);
+  delay(5000);
+  SetMotorPwm(Motor::Left, 0);
+  EnableMotor(Motor::Left, false);
 
   TestPrompt("Left motor reverse");
+  EnableMotor(Motor::Left, true);
   SetMotorPwm(Motor::Left, -20);
-  delay(3000);
+  delay(5000);
   SetMotorPwm(Motor::Left, 0);
   EnableMotor(Motor::Left, false);
 
   TestPrompt("Right motor forward");
   EnableMotor(Motor::Right, true);
   SetMotorPwm(Motor::Right, 20);
-  delay(3000);
+  delay(5000);
+  SetMotorPwm(Motor::Right, 0);
+  EnableMotor(Motor::Right, false);
 
   TestPrompt("Right motor reverse");
+  EnableMotor(Motor::Right, true);
   SetMotorPwm(Motor::Right, -20);
-  delay(3000);
+  delay(5000);
   SetMotorPwm(Motor::Right, 0);
   EnableMotor(Motor::Right, false);
 }
