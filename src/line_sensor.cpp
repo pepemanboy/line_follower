@@ -26,7 +26,7 @@ void LineSensor::Reset() {
 void LineSensor::OnQtrArrayReading(int32_t qtr_readings[kNumQtrSensors]) {
   for (int i = 0; i < kNumQtrSensors; ++i) {
     float reading = 
-      kInvertQtrReadings ? qtr_readings[i] : kAdcResolution - qtr_readings[i];
+      kInvertQtrReadings ?  kAdcResolution - qtr_readings[i] : qtr_readings[i];
     reading -= kAdcThreshold;
     if (reading < 0) reading = 0;
     filters_[i].Update(reading);
