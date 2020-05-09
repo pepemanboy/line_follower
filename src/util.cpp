@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <math.h>
+
 namespace line_follower {
 
 template <typename T>
@@ -31,7 +33,7 @@ MaybeValid<Stats> WeightedStats(
     const float x = (observations[i] - weighted_average);
     stddev_sum += weights[i] * x * x;
   }
-  const float weighted_stddev = stddev_sum / weights_sum;
+  const float weighted_stddev = sqrt(stddev_sum / weights_sum);
 
   return MakeMaybeValid<Stats>({weighted_average, weighted_stddev}, true);
 }
