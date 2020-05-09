@@ -149,7 +149,7 @@ void LineFollowerStartupTest::SensorsTest() {
     float raw_average = 0;    
     for (int i = 0; i < kNumQtrSensors; ++i) {
       raw_average += qtr_sensors[i];
-      char buf[20];
+      char buf[30];
       sprintf(buf, "QTR%d = %d, %d", i, 
               (int)qtr_sensors[i], 
               (int)line_sensor.DebugRawFilters()[i].output());
