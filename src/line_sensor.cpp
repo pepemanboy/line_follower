@@ -34,7 +34,7 @@ void LineSensor::OnQtrArrayReading(int32_t qtr_readings[kNumQtrSensors]) {
 }
 
 float LineSensor::SensorPosition_mm(int sensor_index) const {
-  return kQtrSensorSeparation_mm * (sensor_index - kNumQtrSensors / 2);
+  return kQtrSensorSeparation_mm * (sensor_index - kNumQtrSensors / 2 + 0.5f);
 }
 
 MaybeValid<Stats> LineSensor::MaybeOutput_mm() {
