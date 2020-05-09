@@ -3,19 +3,18 @@
 
 #include <stdint.h>
 
-#include "line_sensor.h"
-
 namespace line_follower {
 
 class LowPassFilter {
 public:
-  explicit LowPassFilter(float initial_output, float weight);
+  LowPassFilter();
+  LowPassFilter(float initial_output, float weight);
   
   void Reset(float initial_output);
   void Update(float measurement); 
 
   void set_weight(float weight) { weight_ = weight; }
-  float output() { return output_; }
+  float output() const { return output_; }
 
 private:
   float weight_;  // Init in constructor.

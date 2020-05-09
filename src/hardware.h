@@ -36,8 +36,8 @@ enum class Led {
 
 void HardwareInit();
 
-void ReadQtrSensors(int readings[kNumQtrSensors]);
-void ReadCurrentSensors(int readings[kNumCurrentSensors]);
+void ReadQtrSensors(int32_t readings[kNumQtrSensors]);
+void ReadCurrentSensors(int32_t readings[kNumCurrentSensors]);
 bool ReadButton(Button button);
 
 void SetTowerLight(TowerLight light, bool state);

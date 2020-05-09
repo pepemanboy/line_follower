@@ -1,9 +1,16 @@
 #include "line_sensor.h"
 
+#include "util.h"
+
+constexpr float kQtrSensorSeparation_mm = 12.5f;
+constexpr float kMaxQtrStdDev_mm = 30.0f;
+
 namespace line_follower {
 
-
 LineSensor::LineSensor() {
+  for (int i = 0; i < kNumQtrSensors; ++i) {
+    sensor_positions_mm_[i] = SensorPosition_mm(i);
+  }
   Reset();
 }
 
@@ -19,9 +26,24 @@ void LineSensor::OnQtrArrayReading(int32_t qtr_readings[kNumQtrSensors]) {
   }
 }
 
-MaybeValid<float> LineSensor::Output_cm() {
-
+float LineSensor::SensorPosition_mm(int sensor_index) const {
+  return kQtrSensorSeparation_mm * (sensor_index - kNumQtrSensors / 2);
 }
 
+MaybeValid<Stats> LineSensor::MaybeOutput_mm() {
+  float readings[kNumQtrSensors];
+  for (int i = 0; i < kNumQtrSensors; ++i) {
+    readings[i] = filters_[i].output();
+  }
+  MaybeValid<Stats> maybe_stats = 
+    WeightedStats(readings, sensor_positions_mm_, kNumQtrSensors);
+
+  if (maybe_stats.valid &&
+      maybe_stats.value.std_dev > kMaxQtrStdDev_mm) {
+    maybe_stats.valid = false;
+  }
+
+  return maybe_stats;
+}
 
 }  // namespace line_follower

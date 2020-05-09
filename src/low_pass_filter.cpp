@@ -2,6 +2,8 @@
 
 namespace line_follower {
 
+LowPassFilter::LowPassFilter():LowPassFilter(0.0f, 1.0f) {}
+
 LowPassFilter::LowPassFilter(float initial_output, float weight) {
   set_weight(weight);
   Reset(initial_output);

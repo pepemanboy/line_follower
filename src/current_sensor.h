@@ -13,10 +13,10 @@ public:
   void Reset();
 
   void OnAnalogSample(int32_t analog_sample);
-  float Output_Amps() { return filter_Amps.output(); }
+  float Output_Amps() const { return filter_A_.output(); }
 
 private:
-  LowPassFilter filter_Amps;
+  LowPassFilter filter_A_;
 };
 
 }  // namespace line_follower

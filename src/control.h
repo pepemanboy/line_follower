@@ -4,6 +4,9 @@
 #include <stdint.h>
 
 #include "line_sensor.h"
+#include "current_sensor.h"
+
+namespace line_follower {
 
 class Control {
 public:
@@ -12,9 +15,10 @@ public:
   void Poll(uint32_t micros);
 
 private:
-  LineSensor line_sensor_;
-  CurrentSensor current_sensors_[kNumCurrentSensors];
-
+  LineSensor line_sensor_ = {};
+  CurrentSensor current_sensors_[kNumCurrentSensors] = {};
 };
+
+}  // namespace line_follower
 
 #endif  // LINE_FOLLOWER_CONTROL_H

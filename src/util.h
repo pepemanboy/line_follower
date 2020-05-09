@@ -10,12 +10,15 @@ struct MaybeValid {
 };
 
 template <typename T>
-struct MakeMaybeValid (T value, bool valid) {
-  MaybeValid<T> m;
-  m.value = value;
-  m.valid = valid;
-  return m;
-}
+MaybeValid<T> MakeMaybeValid(T value, bool valid);
+
+struct Stats {
+  float average;
+  float std_dev;
+};
+
+MaybeValid<Stats> WeightedStats(
+    const float * weights, const float *observations, int n);
 
 }  // namespace line_follower
 

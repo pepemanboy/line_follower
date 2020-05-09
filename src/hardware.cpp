@@ -51,13 +51,13 @@ void HardwareInit() {
   EnableMotor(Motor::Right, false);
 }
 
-void ReadQtrSensors(int readings[kNumQtrSensors]) {
+void ReadQtrSensors(int32_t readings[kNumQtrSensors]) {
   for (int i = 0; i < kNumQtrSensors; ++i) {
     readings[i] = analogRead(kQtrSensorPins[i]);
   }
 }
 
-void ReadCurrentSensors(int readings[kNumCurrentSensors]) {
+void ReadCurrentSensors(int32_t readings[kNumCurrentSensors]) {
   for (int i = 0; i < kNumCurrentSensors; ++i) {
     readings[i] = analogRead(kCurrentSensorPins[i]);
   }
@@ -144,10 +144,5 @@ void SetLed(Led led, bool state) {
     case Led::Red: digitalWrite(kLedRedPin, state); break;
   }
 }
-
-
-
-
-
 
 }  // namespace line_follower
