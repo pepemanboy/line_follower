@@ -16,6 +16,7 @@ public:
 
   void OnQtrArrayReading(int32_t qtr_readings[kNumQtrSensors]);
   MaybeValid<Stats> MaybeOutput_mm();
+  const LowPassFilter *DebugRawFilters() const { return filters_; } 
 
 private:
   float SensorPosition_mm(int sensor_index) const;

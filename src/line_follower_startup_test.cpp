@@ -133,7 +133,7 @@ void LineFollowerStartupTest::StartupTest() {
 
 void LineFollowerStartupTest::SensorsTest() {
   Bluetooth.println("Sensors test!");
-  LineSensor line_sensor_ = {};
+  LineSensor line_sensor = {};
 
   TESTPROMPTRETURN("Piston down");
   SetPiston(PistonState::Down);
@@ -144,17 +144,20 @@ void LineFollowerStartupTest::SensorsTest() {
     Bluetooth.println("QTR sensors:");
     int32_t qtr_sensors[kNumQtrSensors];
     ReadQtrSensors(qtr_sensors);
-    float raw_average = 0;
+    line_sensor.OnQtrArrayReading(qtr_sensors);
+
+    float raw_average = 0;    
     for (int i = 0; i < kNumQtrSensors; ++i) {
       raw_average += qtr_sensors[i];
       char buf[20];
-      sprintf(buf, "QTR%d = %d", i, (int)qtr_sensors[i]);
+      sprintf(buf, "QTR%d = %d, %d", i, 
+              (int)qtr_sensors[i], 
+              (int)line_sensor.DebugRawFilters()[i].output());
       Bluetooth.println(buf);
     }
     raw_average /= kNumQtrSensors;
-
-    line_sensor_.OnQtrArrayReading(qtr_sensors);
-    MaybeValid<Stats> line_sensor_stats = line_sensor_.MaybeOutput_mm();
+    
+    MaybeValid<Stats> line_sensor_stats = line_sensor.MaybeOutput_mm();
     char avg_float[10];
     dtostrf(line_sensor_stats.value.average, 7, 3, avg_float);
     char stddev_float[10];
