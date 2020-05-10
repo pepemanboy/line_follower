@@ -4,8 +4,6 @@
 
 constexpr float kQtrSensorSeparation_mm = 12.5f;
 constexpr float kMaxQtrStdDev_mm = 30.0f;
-constexpr bool kInvertQtrReadings = true;
-constexpr int kAdcResolution = 1024;
 constexpr float kAdcThreshold = 624;
 
 namespace line_follower {
@@ -25,9 +23,7 @@ void LineSensor::Reset() {
 
 void LineSensor::OnQtrArrayReading(int32_t qtr_readings[kNumQtrSensors]) {
   for (int i = 0; i < kNumQtrSensors; ++i) {
-    float reading = 
-      kInvertQtrReadings ?  kAdcResolution - qtr_readings[i] : qtr_readings[i];
-    reading -= kAdcThreshold;
+    float reading = qtr_readings[i] - kAdcThreshold;
     if (reading < 0) reading = 0;
     filters_[i].Update(reading);
   }

@@ -1,7 +1,7 @@
 #include "current_sensor.h"
 
-constexpr int kAdcResolution = 1024;
-constexpr float kAdcOffset = kAdcResolution / 2.0f;
+#include "constants.h"
+
 constexpr float kMaxCurrent_A = 30.0f;
 constexpr float kFilterWeight = 0.95f;
 
@@ -16,6 +16,7 @@ void CurrentSensor::Reset() {
 }
 
 void CurrentSensor::OnAnalogSample(int32_t analog_sample) {
+  constexpr int32_t kAdcOffset = kAdcResolution / 2.0f;
   const float sample_A = (analog_sample - kAdcOffset) / kMaxCurrent_A;
   filter_A_.Update(sample_A);
 }

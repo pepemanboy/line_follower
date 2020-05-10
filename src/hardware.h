@@ -50,9 +50,6 @@ void EnableMotor(Motor motor, bool enable);
 
 void SetLed(Led led, bool state);
 
-
-
-
 }  // namespace line_follower
 
 #endif  // LINE_FOLLOWER_HARDWARE_H

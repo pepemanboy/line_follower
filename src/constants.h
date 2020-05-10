@@ -3,6 +3,8 @@
 
 namespace line_follower {
 
+constexpr int kAdcResolution = 1024;
+
 constexpr int kNumCurrentSensors = 2;
 constexpr int kNumQtrSensors = 14;
 constexpr int kNumPushButtons = 2;
