@@ -18,7 +18,8 @@ public:
 
 private:
   void StartupTest();
-  void SensorsTest();
+  void LineSensorsTest();
+  void CurrentSensorsTest();
 };
 
 }  // namespace line_follower

@@ -20,6 +20,9 @@ struct Stats {
 MaybeValid<Stats> WeightedStats(
     const float * weights, const float *observations, int n);
 
+template <typename T>
+T ClampToRange(T val, T min, T max);
+
 }  // namespace line_follower
 
 #endif  // LINE_FOLLOWER_UTIL_H

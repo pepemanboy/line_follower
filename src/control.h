@@ -5,18 +5,46 @@
 
 #include "line_sensor.h"
 #include "current_sensor.h"
+#include "hardware.h"
 
 namespace line_follower {
 
 class Control {
 public:
-  Control();
-  void Init();
-  void Poll(uint32_t micros);
+  enum class State {
+    kIdle,
+    kWaitForReady,
+    kReady,
+    kOperational
+  };
+  
+  struct ControlOutput {
+    float motor_pwm[2];
+    bool motor_enable;
+    PistonState piston_state;
+    State state; 
+  };
 
-private:
+  Control();
+  void Reset();
+  void Poll(uint32_t micros, ControlOutput *output);
+
+  void TransitionToReady();
+  void TransitionToOperational();
+  void TransitionToIdle();
+
+private:  
+  void RunStateMachine(uint32_t micros, ControlOutput *output);
+
   LineSensor line_sensor_ = {};
   CurrentSensor current_sensors_[kNumCurrentSensors] = {};
+
+  State command_;
+  State state_;
+  State last_state_;
+  uint32_t last_idle_micros_;
+  uint32_t last_micros_;
+  float last_error_;
 };
 
 }  // namespace line_follower

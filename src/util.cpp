@@ -5,6 +5,13 @@
 namespace line_follower {
 
 template <typename T>
+T ClampToRange(T val, T min, T max) {
+  if (val < min) val = min;
+  if (val > max) val = max;
+  return val;
+}
+
+template <typename T>
 MaybeValid<T> MakeMaybeValid (T value, bool valid) {
   MaybeValid<T> m;
   m.value = value;

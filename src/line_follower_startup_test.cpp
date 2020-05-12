@@ -131,8 +131,8 @@ void LineFollowerStartupTest::StartupTest() {
   Serial.read();
 }
 
-void LineFollowerStartupTest::SensorsTest() {
-  Bluetooth.println("Sensors test!");
+void LineFollowerStartupTest::LineSensorsTest() {
+  Bluetooth.println("Line sensors test!");
   LineSensor line_sensor = {};
 
   TESTPROMPTRETURN("Piston down");
@@ -177,6 +177,47 @@ void LineFollowerStartupTest::SensorsTest() {
   Serial.read();
 }
 
+void LineFollowerStartupTest::CurrentSensorsTest() {
+  Bluetooth.println("Current sensors test!");
+  CurrentSensor current_sensors[kNumCurrentSensors];
+
+  TESTPROMPTRETURN("Piston down");
+  SetPiston(PistonState::Down);
+  delay(10000);
+  SetPiston(PistonState::Idle);
+
+  TESTPROMPTRETURN("Drive forward");
+  EnableMotor(Motor::Left, true);
+  EnableMotor(Motor::Right, true);
+  SetMotorPwm(Motor::Left, 10);
+  SetMotorPwm(Motor::Right, 10);  
+
+  while(!Serial.available()) {
+    Bluetooth.println("Current sensors:");
+    int32_t current_readings[kNumCurrentSensors];
+    ReadCurrentSensors(current_readings);
+    for (int i = 0; i < kNumCurrentSensors; ++i) {
+      current_sensors[i].OnAnalogSample(current_readings[i]);
+    }
+
+    for (int i = 0; i < kNumCurrentSensors; ++i) {
+      char buf[30];
+      sprintf(buf, "CS%d = %d, %d", i, 
+              (int)current_readings[i], 
+              (int)current_sensors[i].Output_Amps());
+      Bluetooth.println(buf);
+    }
+
+    Bluetooth.println();
+    Bluetooth.println();
+    delay(1000);
+  }
+
+  EnableMotor(Motor::Left, false);
+  EnableMotor(Motor::Right, false);
+  Serial.read();
+}
+
 void LineFollowerStartupTest::Init() {
   HardwareInit();
   Bluetooth.begin(9600);
@@ -187,12 +228,14 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println();
   Bluetooth.println("Welcome to the test");
   Bluetooth.println("Startup test: Press 1");
-  Bluetooth.println("Sensors test: Press 2");
+  Bluetooth.println("Line sensors test: Press 2");
+  Bluetooth.println("Current sensors test: Press 3");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
     case 1: StartupTest(); break;
-    case 2: SensorsTest(); break;
+    case 2: LineSensorsTest(); break;
+    case 3: CurrentSensorsTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;
