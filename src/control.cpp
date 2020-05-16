@@ -147,7 +147,9 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 
   // Update.
   last_state_ = state_;
-  last_micros_ = micros;
+  last_micros_ = micros;  
+
+  output->state = state_;
 }
 
 }  // namespace line_follower
