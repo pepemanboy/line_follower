@@ -8,6 +8,7 @@
 #include "line_sensor.h"
 #include "current_sensor.h"
 #include "button_debounce.h"
+#include "line_follower.h"
 
 namespace line_follower {
 
@@ -98,7 +99,7 @@ void LineFollowerStartupTest::StartupTest() {
   SetMotorPwm(Motor::Right, 0);
   EnableMotor(Motor::Right, false);
 
-  while(!Serial.available()) {
+  while(!Bluetooth.available()) {
     Bluetooth.println("QTR sensors:");
     int32_t qtr_sensors[kNumQtrSensors];
     ReadQtrSensors(qtr_sensors);
@@ -131,7 +132,7 @@ void LineFollowerStartupTest::StartupTest() {
     delay(1000);
   }
 
-  Serial.read();
+  Bluetooth.read();
 }
 
 void LineFollowerStartupTest::LineSensorsTest() {
@@ -143,14 +144,15 @@ void LineFollowerStartupTest::LineSensorsTest() {
   delay(10000);
   SetPiston(PistonState::Idle);
 
-  while(!Serial.available()) {
+  float raw_min = 2000;
+
+  while(!Bluetooth.available()) {
     Bluetooth.println("QTR sensors:");
     int32_t qtr_sensors[kNumQtrSensors];
     ReadQtrSensors(qtr_sensors);
     line_sensor.OnQtrArrayReading(qtr_sensors);
 
-    float raw_average = 0;   
-    float raw_min = 2000; 
+    float raw_average = 0;
     for (int i = 0; i < kNumQtrSensors; ++i) {
       raw_average += qtr_sensors[i];
       raw_min = min(raw_min, qtr_sensors[i]);
@@ -182,7 +184,7 @@ void LineFollowerStartupTest::LineSensorsTest() {
     delay(1000);
   }
 
-  Serial.read();
+  Bluetooth.read();
 }
 
 void LineFollowerStartupTest::CurrentSensorsTest() {
@@ -200,7 +202,7 @@ void LineFollowerStartupTest::CurrentSensorsTest() {
   SetMotorPwm(Motor::Left, 10);
   SetMotorPwm(Motor::Right, 10);  
 
-  while(!Serial.available()) {
+  while(!Bluetooth.available()) {
     Bluetooth.println("Current sensors:");
     int32_t current_readings[kNumCurrentSensors];
     ReadCurrentSensors(current_readings);
@@ -223,7 +225,7 @@ void LineFollowerStartupTest::CurrentSensorsTest() {
 
   EnableMotor(Motor::Left, false);
   EnableMotor(Motor::Right, false);
-  Serial.read();
+  Bluetooth.read();
 }
 
 void LineFollowerStartupTest::ButtonsTest() {
@@ -233,7 +235,7 @@ void LineFollowerStartupTest::ButtonsTest() {
   ButtonDebounce button_up = {};
   ButtonDebounce button_down = {};
 
-  while(!Serial.available()) {
+  while(!Bluetooth.available()) {
     const uint32_t now = micros();
 
     // Read buttons.
@@ -249,7 +251,22 @@ void LineFollowerStartupTest::ButtonsTest() {
 
     delay(100);
   }
-  Serial.read();
+  Bluetooth.read();
+}
+
+void LineFollowerStartupTest::LineFollowerTest() {
+  Bluetooth.println("Line follower test!");
+  Bluetooth.println("Press Up button to transition up");
+  Bluetooth.println("Press Down button to transition down");
+
+  LineFollower robot;
+  robot.Init();
+
+  while(!Bluetooth.available()) {
+    robot.Poll(micros());
+  }
+  
+  Bluetooth.read();
 }
 
 void LineFollowerStartupTest::Init() {
@@ -265,6 +282,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Line sensors test: Press 2");
   Bluetooth.println("Current sensors test: Press 3");
   Bluetooth.println("Buttons test: Press 4");
+  Bluetooth.println("Line follower test: Press 5");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
@@ -272,6 +290,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
     case 2: LineSensorsTest(); break;
     case 3: CurrentSensorsTest(); break;
     case 4: ButtonsTest(); break;
+    case 5: LineFollowerTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;

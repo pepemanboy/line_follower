@@ -18,6 +18,7 @@ private:
   void LineSensorsTest();
   void CurrentSensorsTest();
   void ButtonsTest();
+  void LineFollowerTest();
 };
 
 }  // namespace line_follower

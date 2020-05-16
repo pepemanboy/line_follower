@@ -12,6 +12,7 @@ namespace line_follower {
 class LineFollower {
 public:
   LineFollower();
+  ~LineFollower();
 
   void Init();
 

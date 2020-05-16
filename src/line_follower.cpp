@@ -14,6 +14,16 @@ LineFollower::LineFollower() {
 
 }
 
+LineFollower::~LineFollower() {
+  EnableMotor(Motor::Left, false);
+  EnableMotor(Motor::Right, false);
+  SetTowerLight(TowerLight::Red, false);
+  SetTowerLight(TowerLight::Green, false);
+  SetTowerLight(TowerLight::Yellow, false);
+  SetTowerSound(false);
+  SetPiston(PistonState::Up);
+}
+
 void LineFollower::Init() {
   HardwareInit();
   control_.Reset();
