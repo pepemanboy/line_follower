@@ -145,6 +145,7 @@ void LineFollowerStartupTest::LineSensorsTest() {
   SetPiston(PistonState::Idle);
 
   float raw_min = 2000;
+  float raw_max = 0;
 
   while(!Bluetooth.available()) {
     Bluetooth.println("QTR sensors:");
@@ -156,6 +157,7 @@ void LineFollowerStartupTest::LineSensorsTest() {
     for (int i = 0; i < kNumQtrSensors; ++i) {
       raw_average += qtr_sensors[i];
       raw_min = min(raw_min, qtr_sensors[i]);
+      raw_max = max(raw_max, qtr_sensors[i]);
       char buf[30];
       sprintf(buf, "QTR%d = %d, %d", i, 
               (int)qtr_sensors[i], 
@@ -173,10 +175,12 @@ void LineFollowerStartupTest::LineSensorsTest() {
     dtostrf(raw_average, 7, 3, raw_float);
     char min_float[10];
     dtostrf(raw_min, 7, 3, min_float);
-    char buf[70];
-    sprintf(buf, "Valid? %d Average: %s StdDev: %s Raw: %s Min %s",
+    char max_float[10];
+    dtostrf(raw_max, 7, 3, max_float);
+    char buf[80];
+    sprintf(buf, "Valid? %d Average: %s StdDev: %s Raw: %s Min %s Max %s",
             line_sensor_stats.valid, avg_float, stddev_float, 
-            raw_float, min_float);
+            raw_float, min_float, max_float);
     Bluetooth.println(buf);
 
     Bluetooth.println();
