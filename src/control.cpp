@@ -12,7 +12,7 @@ constexpr int32_t kPistonReady_micros = 10000000;
 constexpr float kBasePwmDc = 0.5;
 constexpr float kMinPwmDc = 0;
 constexpr float kMaxPwmDc = 0.9;
-constexpr float kMaxCurrent_A = 7;
+constexpr float kMaxCurrent_A = 1000;
 constexpr float kPidKp = 0.01;
 constexpr float kPidKd = 0;
 

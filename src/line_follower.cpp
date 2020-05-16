@@ -46,8 +46,8 @@ void LineFollower::Poll(uint32_t micros) {
   // Update motors.
   EnableMotor(Motor::Left, control_output.motor_enable);
   EnableMotor(Motor::Right, control_output.motor_enable);
-  SetMotorPwm(Motor::Left, control_output.motor_pwm[0] * 255);
-  SetMotorPwm(Motor::Right, control_output.motor_pwm[1] * 255);
+  SetMotorPwm(Motor::Left, control_output.motor_pwm[0] * 255.0f);
+  SetMotorPwm(Motor::Right, control_output.motor_pwm[1] * 255.0f);
 
   // Update piston.
   SetPiston(control_output.piston_state);
