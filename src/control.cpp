@@ -8,7 +8,7 @@
 #endif
 #define abs(x) ((x)>0?(x):-(x))
 
-constexpr int32_t kPistonReady_micros = 5000;
+constexpr int32_t kPistonReady_micros = 5000000;
 constexpr float kBasePwmDc = 0.5;
 constexpr float kMinPwmDc = 0;
 constexpr float kMaxPwmDc = 0.9;

@@ -203,8 +203,8 @@ void LineFollowerStartupTest::CurrentSensorsTest() {
   TESTPROMPTRETURN("Drive forward");
   EnableMotor(Motor::Left, true);
   EnableMotor(Motor::Right, true);
-  SetMotorPwm(Motor::Left, 50);
-  SetMotorPwm(Motor::Right, 50);  
+  SetMotorPwm(Motor::Left, 200);
+  SetMotorPwm(Motor::Right, 200);  
 
   while(!Bluetooth.available()) {
     Bluetooth.println("Current sensors:");

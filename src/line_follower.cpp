@@ -79,7 +79,7 @@ void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
   SetTowerLight(TowerLight::Red, red);
   SetTowerLight(TowerLight::Green, green);
   SetTowerLight(TowerLight::Yellow, yellow);
-  SetTowerSound(sound);
+  SetTowerSound(/*sound*/ false);
 }
 
 }  // namespace line_follower
