@@ -13,8 +13,8 @@ constexpr float kBasePwmDc = 0.5;
 constexpr float kMinPwmDc = 0;
 constexpr float kMaxPwmDc = 0.9;
 constexpr float kMaxCurrent_A = 1000;
-constexpr float kPidKp = 0.01;
-constexpr float kPidKd = 0;
+constexpr float kPidKp = 0.001;
+constexpr float kPidKd = 1;
 
 namespace line_follower {
 
@@ -140,6 +140,8 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       output->motor_pwm[1] =
         ClampToRange(kBasePwmDc - pd_output, kMinPwmDc, kMaxPwmDc);
       output->motor_enable = true;
+
+      last_error_ = error;
 
       break;
     }
