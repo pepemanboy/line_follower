@@ -6,6 +6,8 @@
 
 #include "control.h"
 
+constexpr uint32_t kTowerBlinkPeriod_micros = 500000;
+
 namespace line_follower {
 
 LineFollower::LineFollower() {
@@ -43,8 +45,8 @@ void LineFollower::Poll(uint32_t micros) {
 
 void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
   static uint32_t last_toggle_micros = micros;
-  static uint32_t toggle_state = true;
-  if (micros - last_toggle_micros > 500000) {
+  static bool toggle_state = true;
+  if (micros - last_toggle_micros > kTowerBlinkPeriod_micros) {
     last_toggle_micros = micros;
     toggle_state = !toggle_state;
   }

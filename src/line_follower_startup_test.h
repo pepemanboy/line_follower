@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-#include "line_sensor.h"
-#include "current_sensor.h"
-
 namespace line_follower {
 
 class LineFollowerStartupTest {
@@ -20,6 +17,7 @@ private:
   void StartupTest();
   void LineSensorsTest();
   void CurrentSensorsTest();
+  void ButtonsTest();
 };
 
 }  // namespace line_follower

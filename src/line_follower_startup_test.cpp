@@ -5,6 +5,9 @@
 #include <Arduino.h>
 #include "hardware.h"
 #include "util.h"
+#include "line_sensor.h"
+#include "current_sensor.h"
+#include "button_debounce.h"
 
 namespace line_follower {
 
@@ -223,6 +226,32 @@ void LineFollowerStartupTest::CurrentSensorsTest() {
   Serial.read();
 }
 
+void LineFollowerStartupTest::ButtonsTest() {
+  Bluetooth.println("Buttons test!");
+  Bluetooth.println("Press a button.");
+
+  ButtonDebounce button_up = {};
+  ButtonDebounce button_down = {};
+
+  while(!Serial.available()) {
+    const uint32_t now = micros();
+
+    // Read buttons.
+    button_up.OnDigitalRead(now, ReadButton(Button::Up));    
+    button_down.OnDigitalRead(now, ReadButton(Button::Down));
+
+    if (button_up.Pulse()) {
+      Bluetooth.println("Button up pressed");
+    }
+    if (button_down.Pulse()) {
+      Bluetooth.println("Button down pressed");
+    }
+
+    delay(100);
+  }
+  Serial.read();
+}
+
 void LineFollowerStartupTest::Init() {
   HardwareInit();
   Bluetooth.begin(9600);
@@ -235,12 +264,14 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Startup test: Press 1");
   Bluetooth.println("Line sensors test: Press 2");
   Bluetooth.println("Current sensors test: Press 3");
+  Bluetooth.println("Buttons test: Press 4");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
     case 1: StartupTest(); break;
     case 2: LineSensorsTest(); break;
     case 3: CurrentSensorsTest(); break;
+    case 4: ButtonsTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;
