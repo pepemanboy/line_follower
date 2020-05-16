@@ -9,12 +9,12 @@
 #define abs(x) ((x)>0?(x):-(x))
 
 constexpr int32_t kPistonReady_micros = 5000;
-constexpr float kBasePwmDc = 0.2;
+constexpr float kBasePwmDc = 0.5;
 constexpr float kMinPwmDc = 0;
-constexpr float kMaxPwmDc = 0.4;
-constexpr float kMaxCurrent_A = 10;
-constexpr float kPidKp = 0.1;
-constexpr float kPidKd = 0.1;
+constexpr float kMaxPwmDc = 0.9;
+constexpr float kMaxCurrent_A = 7;
+constexpr float kPidKp = 0.01;
+constexpr float kPidKd = 0;
 
 namespace line_follower {
 
