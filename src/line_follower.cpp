@@ -18,19 +18,27 @@ void LineFollower::Init() {
 }
 
 void LineFollower::Poll(uint32_t micros) {
-  Control::ControlOutput control_output;
-  if (ReadButton(Button::Down)) {
-    control_.TransitionToReady();
-  }
-  if (ReadButton(Button::Up)) {
-    control_.TransitionToOperational();
-  }
+  // Read buttons.
+  button_up_.OnDigitalRead(micros, ReadButton(Button::Up));  
+  if (button_up_.Pulse()) control_.TransitionUp();
+  button_down_.OnDigitalRead(micros, ReadButton(Button::Down));
+  if (button_down_.Pulse()) control_.TransitionDown();
 
+  // Run control cycle.
+  Control::ControlOutput control_output;
   control_.Poll(micros, &control_output);
 
   // Update tower light and sound.
   UpdateTower(micros, control_output.state);
-  
+
+  // Update motors.
+  EnableMotor(Motor::Left, control_output.motor_enable);
+  EnableMotor(Motor::Right, control_output.motor_enable);
+  SetMotorPwm(Motor::Left, control_output.motor_pwm[0]);
+  SetMotorPwm(Motor::Right, control_output.motor_pwm[1]);
+
+  // Update piston.
+  SetPiston(control_output.piston_state);
 }
 
 void LineFollower::UpdateTower(uint32_t micros, Control::State state) {

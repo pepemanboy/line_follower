@@ -5,6 +5,7 @@
 
 #include "hardware.h"
 #include "control.h"
+#include "button_debounce.h"
 
 namespace line_follower {
 
@@ -19,6 +20,8 @@ public:
 private:
   void UpdateTower(uint32_t micros, Control::State state);
   Control control_ = {};
+  ButtonDebounce button_up_ = {};
+  ButtonDebounce button_down_ = {};
 };
 
 }  // namespace line_follower

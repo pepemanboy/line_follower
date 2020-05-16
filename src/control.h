@@ -32,6 +32,8 @@ public:
   void TransitionToReady();
   void TransitionToOperational();
   void TransitionToIdle();
+  void TransitionDown();
+  void TransitionUp();
 
 private:  
   void RunStateMachine(uint32_t micros, ControlOutput *output);

@@ -68,6 +68,15 @@ void Control::TransitionToIdle() {
   }
 }
 
+void Control::TransitionDown() {
+  TransitionToIdle();
+}
+
+void Control::TransitionUp() {
+  if (last_state_ == State::kIdle) return TransitionToReady();
+  TransitionToOperational();
+}
+
 void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
   const bool new_state = state_ != last_state_;
   switch(state_) {
