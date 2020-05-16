@@ -8,7 +8,7 @@
 #endif
 #define abs(x) ((x)>0?(x):-(x))
 
-constexpr int32_t kPistonReady_micros = 5000000;
+constexpr int32_t kPistonReady_micros = 10000000;
 constexpr float kBasePwmDc = 0.5;
 constexpr float kMinPwmDc = 0;
 constexpr float kMaxPwmDc = 0.9;
@@ -130,7 +130,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 
       // Run PD controller.
       const float error = maybe_line.value.average;
-      const float dt_s = (micros - last_micros_) / 1000000;
+      const float dt_s = (micros - last_micros_) / 1000000.0f;
       if (dt_s == 0) break;
       const float d_output = (error - last_error_) / dt_s * kPidKd;
       const float pd_output = kPidKp * (error + d_output);
