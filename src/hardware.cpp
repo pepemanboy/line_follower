@@ -53,7 +53,7 @@ void HardwareInit() {
 
 void ReadQtrSensors(int32_t readings[kNumQtrSensors]) {
   for (int i = 0; i < kNumQtrSensors; ++i) {
-    readings[i] = kAdcResolution - analogRead(kQtrSensorPins[i]);
+    readings[i] = analogRead(kQtrSensorPins[i]);
   }
 }
 
