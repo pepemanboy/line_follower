@@ -146,9 +146,11 @@ void LineFollowerStartupTest::LineSensorsTest() {
     ReadQtrSensors(qtr_sensors);
     line_sensor.OnQtrArrayReading(qtr_sensors);
 
-    float raw_average = 0;    
+    float raw_average = 0;   
+    float raw_min = 2000; 
     for (int i = 0; i < kNumQtrSensors; ++i) {
       raw_average += qtr_sensors[i];
+      raw_min = min(raw_min, qtr_sensors[i]);
       char buf[30];
       sprintf(buf, "QTR%d = %d, %d", i, 
               (int)qtr_sensors[i], 
@@ -164,9 +166,12 @@ void LineFollowerStartupTest::LineSensorsTest() {
     dtostrf(line_sensor_stats.value.std_dev, 7, 3, stddev_float);
     char raw_float[10];
     dtostrf(raw_average, 7, 3, raw_float);
-    char buf[60];
-    sprintf(buf, "Valid? %d Average: %s StdDev: %s Raw: %s",
-            line_sensor_stats.valid, avg_float, stddev_float, raw_float);
+    char min_float[10];
+    dtostrf(raw_min, 7, 3, min_float);
+    char buf[70];
+    sprintf(buf, "Valid? %d Average: %s StdDev: %s Raw: %s Min %s",
+            line_sensor_stats.valid, avg_float, stddev_float, 
+            raw_float, min_float);
     Bluetooth.println(buf);
 
     Bluetooth.println();
