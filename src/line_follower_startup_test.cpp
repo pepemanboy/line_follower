@@ -300,7 +300,7 @@ float LineFollowerStartupTest::ReadBluetoothFloat() {
     if (Bluetooth.available()) {
       char read = Bluetooth.read();          
       Bluetooth.print(read);
-      if (read == '\n') break;
+      if (read == '\n' || read == '\r') break;
       buf[buf_index++] = read;  
     }
   }
