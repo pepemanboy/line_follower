@@ -35,6 +35,13 @@ public:
   void TransitionDown();
   void TransitionUp();
 
+  void set_pid_kp(float pid_kp) { pid_kp_ = pid_kp; }
+  float pid_kp() { return pid_kp_; }
+
+  void set_pid_kd(float pid_kd) { pid_kd_ = pid_kd; }
+  float pid_kd() { return pid_kd_; }
+
+
 private:  
   void RunStateMachine(uint32_t micros, ControlOutput *output);
 
@@ -47,6 +54,9 @@ private:
   uint32_t last_idle_micros_;
   uint32_t last_micros_;
   float last_error_;
+
+  float pid_kp_;
+  float pid_kd_;
 };
 
 }  // namespace line_follower

@@ -20,6 +20,8 @@ namespace line_follower {
 
 Control::Control() {
   Reset();
+  pid_kp_ = kPidKp;
+  pid_kd_ = kPidKd;
 }
 
 void Control::Reset() {

@@ -273,6 +273,10 @@ void LineFollowerStartupTest::LineFollowerTest() {
   Bluetooth.read();
 }
 
+void LineFollowerStartupTest::AdjustPidKp() {}
+
+void LineFollowerStartupTest::AdjustPidKd() {}
+
 void LineFollowerStartupTest::Init() {
   HardwareInit();
   Bluetooth.begin(9600);
@@ -287,6 +291,8 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Current sensors test: Press 3");
   Bluetooth.println("Buttons test: Press 4");
   Bluetooth.println("Line follower test: Press 5");
+  Bluetooth.println("Adjust PID Kp: Press 6");
+  Bluetooth.println("Adjust PID Kd: Press 7");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
@@ -295,6 +301,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
     case 3: CurrentSensorsTest(); break;
     case 4: ButtonsTest(); break;
     case 5: LineFollowerTest(); break;
+    case 6: AdjustPidKp(); break;
     default:
       Bluetooth.println("Invalid option");
       break;
