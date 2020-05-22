@@ -14,7 +14,7 @@ constexpr float kMinPwmDc = 0;
 constexpr float kMaxPwmDc = 0.9;
 constexpr float kMaxCurrent_A = 1000;
 constexpr float kPidKp = 0.001;
-constexpr float kPidKd = 1;
+constexpr float kPidKd = 3;
 
 namespace line_follower {
 

@@ -14,7 +14,7 @@ namespace line_follower {
 
 LineFollowerStartupTest::LineFollowerStartupTest() {}
 
-#define Bluetooth Serial2
+#define Bluetooth Serial
 
 int TestPrompt(const char * prompt) {
   Bluetooth.print(prompt);
@@ -265,6 +265,24 @@ void LineFollowerStartupTest::LineFollowerTest() {
 
   LineFollower robot;
   robot.Init();
+  if (pid_kp_ >= 0) robot.SetControlPidKp(pid_kp_);
+  if (pid_kd_ >= 0) robot.SetControlPidKd(pid_kd_);
+
+  {
+    char float_buf[20];
+    dtostrf(robot.ControlPidKp(), 7, 4, float_buf);
+    char buf[30];
+    sprintf(buf, "KP = %s", float_buf);
+    Bluetooth.println(buf);
+  }
+
+  {
+    char float_buf[20];
+    dtostrf(robot.ControlPidKd(), 7, 4, float_buf);
+    char buf[30];
+    sprintf(buf, "KD = %s", float_buf);
+    Bluetooth.println(buf);
+  }  
 
   while(!Bluetooth.available()) {
     robot.Poll(micros());
@@ -273,9 +291,68 @@ void LineFollowerStartupTest::LineFollowerTest() {
   Bluetooth.read();
 }
 
-void LineFollowerStartupTest::AdjustPidKp() {}
+float LineFollowerStartupTest::ReadBluetoothFloat() {
+  constexpr uint8_t buf_size = 10;
+  uint8_t buf_index = 0;
+  char buf[buf_size] = {0};
 
-void LineFollowerStartupTest::AdjustPidKd() {}
+  while(buf_index < buf_size - 1) {
+    if (Bluetooth.available()) {
+      char read = Bluetooth.read();          
+      Bluetooth.print(read);
+      if (read == '\n') break;
+      buf[buf_index++] = read;  
+    }
+  }
+
+  return atof(buf);
+}
+
+void LineFollowerStartupTest::AdjustPidKp() {
+  Bluetooth.println("Send PID Kp followed by Enter");
+  float new_kp = ReadBluetoothFloat();
+
+  char new_kp_str[20];
+  dtostrf(new_kp, 7, 4, new_kp_str);
+  char buf[50];
+  sprintf(buf, "New value is: %s, press '1' for OK", new_kp_str);
+  Bluetooth.println(buf);
+
+  while(!Bluetooth.available()) {
+    delay(100);
+  }
+  char read = Bluetooth.read();
+
+  if (read == '1') {
+    pid_kp_ = new_kp;
+    Bluetooth.println("Saved");
+  } else {
+    Bluetooth.println("Not saved");
+  }
+}
+
+void LineFollowerStartupTest::AdjustPidKd() {
+  Bluetooth.println("Send PID Kd followed by Enter");
+  float new_kd = ReadBluetoothFloat();
+
+  char new_kd_str[20];
+  dtostrf(new_kd, 7, 4, new_kd_str);
+  char buf[50];
+  sprintf(buf, "New value is: %s, press '1' for OK", new_kd_str);
+  Bluetooth.println(buf);
+
+  while(!Bluetooth.available()) {
+    delay(100);
+  }
+  char read = Bluetooth.read();
+
+  if (read == '1') {
+    pid_kd_ = new_kd;
+    Bluetooth.println("Saved");
+  } else {
+    Bluetooth.println("Not saved");
+  }
+}
 
 void LineFollowerStartupTest::Init() {
   HardwareInit();
@@ -302,6 +379,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
     case 4: ButtonsTest(); break;
     case 5: LineFollowerTest(); break;
     case 6: AdjustPidKp(); break;
+    case 7: AdjustPidKd(); break;
     default:
       Bluetooth.println("Invalid option");
       break;

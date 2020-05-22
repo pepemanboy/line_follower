@@ -21,6 +21,11 @@ private:
   void LineFollowerTest();
   void AdjustPidKp();
   void AdjustPidKd();
+
+  float ReadBluetoothFloat();
+
+  float pid_kp_ = -1;
+  float pid_kd_ = -1;
 };
 
 }  // namespace line_follower
