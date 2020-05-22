@@ -134,8 +134,8 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       const float error = maybe_line.value.average;
       const float dt_s = (micros - last_micros_) / 1000000.0f;
       if (dt_s == 0) break;
-      const float d_output = (error - last_error_) / dt_s * kPidKd;
-      const float pd_output = kPidKp * (error + d_output);
+      const float d_output = (error - last_error_) / dt_s * pid_kd_;
+      const float pd_output = pid_kp_ * (error + d_output);
 
       output->motor_pwm[0] = 
         ClampToRange(kBasePwmDc + pd_output, kMinPwmDc, kMaxPwmDc);
