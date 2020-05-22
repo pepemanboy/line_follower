@@ -14,7 +14,7 @@ namespace line_follower {
 
 LineFollowerStartupTest::LineFollowerStartupTest() {}
 
-#define Bluetooth Serial
+#define Bluetooth Serial2
 
 int TestPrompt(const char * prompt) {
   Bluetooth.print(prompt);
