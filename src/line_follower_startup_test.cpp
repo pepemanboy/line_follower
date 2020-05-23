@@ -139,10 +139,21 @@ void LineFollowerStartupTest::LineSensorsTest() {
   Bluetooth.println("Line sensors test!");
   LineSensor line_sensor = {};
 
-  TESTPROMPTRETURN("Piston down");
-  SetPiston(PistonState::Down);
-  delay(10000);
-  SetPiston(PistonState::Idle);
+  Bluetooth.println("If you want piston down, press '1'. If not, other key.");
+  while(!Bluetooth.available()) {
+    delay(100);
+  }
+  char read = Bluetooth.read();
+
+  if (read == '1') {
+    Bluetooth.println("Piston going down");
+    SetPiston(PistonState::Down);
+    delay(10000);
+    SetPiston(PistonState::Idle);
+  } else {
+    Bluetooth.println("Piston staying up");
+    SetPiston(PistonState::Up);
+  }  
 
   float raw_min = 2000;
   float raw_max = 0;
