@@ -14,7 +14,7 @@ constexpr float kMinPwmDc = 0;
 constexpr float kMaxPwmDc = 0.9;
 constexpr float kMaxCurrent_A = 1000;
 constexpr float kPidKp = 0.001;
-constexpr float kPidKd = 3;
+constexpr float kPidKd = 7;
 
 namespace line_follower {
 
@@ -112,7 +112,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         ramp_mult_ = 0;
       }
 
-      ramp_mult_ = ramp_mult_ + 0.01 > 1 ? 1 : ramp_mult_;
+      ramp_mult_ = ramp_mult_ + 0.01 > 1 ? 1 : ramp_mult_ + 0.01;
 
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
