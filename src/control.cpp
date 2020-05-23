@@ -109,7 +109,10 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
     case State::kOperational: {
       if (new_state) {
         last_error_ = 0;
+        ramp_mult_ = 0;
       }
+
+      ramp_mult_ = ramp_mult_ + 0.01 > 1 ? 1 : ramp_mult_;
 
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
@@ -138,9 +141,9 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       const float pd_output = pid_kp_ * (error + d_output);
 
       output->motor_pwm[0] = 
-        ClampToRange(kBasePwmDc + pd_output, kMinPwmDc, kMaxPwmDc);
+        ClampToRange(kBasePwmDc + pd_output, kMinPwmDc, kMaxPwmDc) * ramp_mult_;
       output->motor_pwm[1] =
-        ClampToRange(kBasePwmDc - pd_output, kMinPwmDc, kMaxPwmDc);
+        ClampToRange(kBasePwmDc - pd_output, kMinPwmDc, kMaxPwmDc) * ramp_mult_;
       output->motor_enable = true;
 
       last_error_ = error;

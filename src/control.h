@@ -56,7 +56,9 @@ private:
   float last_error_;
 
   float pid_kp_;
-  float pid_kd_;
+  float pid_kd_;  
+
+  float ramp_mult_ = 0;
 };
 
 }  // namespace line_follower
