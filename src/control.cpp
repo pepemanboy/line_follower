@@ -15,6 +15,7 @@ constexpr float kMaxPwmDc = 0.8;
 constexpr float kMaxCurrent_A = 1000;
 constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
+constexpr int32_t kMotorStartUp_micros = 1000000;
 
 namespace line_follower {
 
@@ -109,10 +110,13 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
     case State::kOperational: {
       if (new_state) {
         last_error_ = 0;
-        ramp_mult_ = 0;
+        operational_start_micros_ = micros;
       }
-      ramp_mult_ += 0.005;
-      if (ramp_mult_ > 1) ramp_mult_ = 1;
+
+      const uint32_t micros_since_operational_start =
+        micros - operational_start_micros_; 
+      const bool motor_startup_finished = micros_since_operational_start < 
+        kMotorStartUp_micros;
 
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
@@ -120,18 +124,20 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         state_ = State::kIdle;
         break;
       }
-
+      
       // Overcurrent / torque protection.
-      bool overcurrent = false;
-      for (int i = 0; i < kNumCurrentSensors; ++i) {
-        if (abs(current_sensors_[i].Output_Amps()) >= kMaxCurrent_A) {
-          overcurrent = true;
+      if (motor_startup_finished) {
+        bool overcurrent = false;
+        for (int i = 0; i < kNumCurrentSensors; ++i) {
+          if (abs(current_sensors_[i].Output_Amps()) >= kMaxCurrent_A) {
+            overcurrent = true;
+          }
         }
-      }
-      if (overcurrent) {
-        state_ = State::kIdle;
-        break;
-      }
+        if (overcurrent) {
+          state_ = State::kIdle;
+          break;
+        }
+      }      
 
       // Run PD controller.
       const float error = maybe_line.value.average;
@@ -139,14 +145,22 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       if (dt_s == 0) break;
       const float d_output = (error - last_error_) / dt_s * pid_kd_;
       const float pd_output = pid_kp_ * (error + d_output);
+      last_error_ = error;
 
       output->motor_pwm[0] = 
-        ClampToRange(kBasePwmDc + pd_output, kMinPwmDc, kMaxPwmDc) * ramp_mult_;
+        ClampToRange(kBasePwmDc + pd_output, kMinPwmDc, kMaxPwmDc);
       output->motor_pwm[1] =
-        ClampToRange(kBasePwmDc - pd_output, kMinPwmDc, kMaxPwmDc) * ramp_mult_;
+        ClampToRange(kBasePwmDc - pd_output, kMinPwmDc, kMaxPwmDc);
       output->motor_enable = true;
 
-      last_error_ = error;
+      // Ramp up on motor start up.
+      if (!motor_startup_finished) {
+        const float ramp = micros_since_operational_start / 
+          (float) kMotorStartUp_micros;
+        for (int i = 0; i < 2; ++i) {
+          output->motor_pwm[i] *= ramp;
+        }
+      }
 
       break;
     }

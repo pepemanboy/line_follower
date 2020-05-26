@@ -54,6 +54,8 @@ private:
   uint32_t last_idle_micros_;
   uint32_t last_micros_;
   float last_error_;
+  
+  uint32_t operational_start_micros_;
 
   float pid_kp_;
   float pid_kd_;  
