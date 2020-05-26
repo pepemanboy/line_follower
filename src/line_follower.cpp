@@ -82,4 +82,8 @@ void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
   SetTowerSound(/*sound*/ false);
 }
 
+float LineFollower::MaxCurrent_A() {
+  return control_.MaxCurrent_A();
+}
+
 }  // namespace line_follower

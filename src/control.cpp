@@ -8,6 +8,10 @@
 #endif
 #define abs(x) ((x)>0?(x):-(x))
 
+#ifndef max
+  #define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 constexpr int32_t kPistonReady_micros = 10000000;
 constexpr float kBasePwmDc = 0.5;
 constexpr float kMinPwmDc = 0;
@@ -167,10 +171,17 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
   }
 
   // Update.
+  output->state = last_state_;
   last_state_ = state_;
-  last_micros_ = micros;  
+  last_micros_ = micros;    
+}
 
-  output->state = state_;
+float Control::MaxCurrent_A() {
+  float max_current_A = 0;
+  for (int i = 0; i < kNumCurrentSensors; ++i) {
+    max_current_A = max(max_current_A, current_sensors_[i].Output_Amps());
+  }
+  return max_current_A;
 }
 
 }  // namespace line_follower

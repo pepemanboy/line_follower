@@ -41,6 +41,8 @@ public:
   void set_pid_kd(float pid_kd) { pid_kd_ = pid_kd; }
   float pid_kd() { return pid_kd_; }
 
+  float MaxCurrent_A();
+
 
 private:  
   void RunStateMachine(uint32_t micros, ControlOutput *output);
