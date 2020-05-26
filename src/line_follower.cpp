@@ -32,7 +32,7 @@ void LineFollower::Init() {
 void LineFollower::Poll(uint32_t micros) {
   // Read buttons.
   button_up_.OnDigitalRead(micros, ReadButton(Button::Up));  
-  if (button_up_.Pulse()) control_.TransitionUp();
+  if (button_up_.Pulse()) control_.TransitionToOperational();
   button_down_.OnDigitalRead(micros, ReadButton(Button::Down));
   if (button_down_.Pulse()) control_.TransitionDown();
 
@@ -64,6 +64,9 @@ void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
   switch(state) {
     case Control::State::kIdle:  
       green = true;
+      break;
+    case Control::State::kIdleReady:
+      green = toggle_state;
       break;
     case Control::State::kWaitForReady:     
       yellow = true;

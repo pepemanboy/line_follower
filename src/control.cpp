@@ -39,6 +39,8 @@ void Control::Reset() {
   last_idle_micros_ = 0;
   last_micros_ = 0;
   last_error_ = 0;
+
+  transition_to_operational_ = false;
 }
 
 void Control::Poll(uint32_t micros, ControlOutput *output) {
@@ -57,41 +59,47 @@ void Control::Poll(uint32_t micros, ControlOutput *output) {
   RunStateMachine(micros, output);
 }
 
-void Control::TransitionToReady() {
-  if (last_state_ == State::kIdle) {
-    state_ = State::kWaitForReady;
-  }
-}
-
-void Control::TransitionToOperational() {
-  if (last_state_ == State::kReady) {
-    state_ = State::kOperational;
-  }
-}
-
-void Control::TransitionToIdle() {
-  if (last_state_ != State::kIdle) {
+void Control::TransitionDown() {
+  if (last_state_ > State::kIdleReady) {
     state_ = State::kIdle;
   }
 }
 
-void Control::TransitionDown() {
-  TransitionToIdle();
+void Control::TransitionUp() {
+  if (last_state_ == State::kIdleReady) {
+    state_ = State::kWaitForReady;
+  } else if (last_state_ == State::kReady) {
+    state_ = State::kOperational;
+  }
+  return;
 }
 
-void Control::TransitionUp() {
-  if (last_state_ == State::kIdle) return TransitionToReady();
-  TransitionToOperational();
+void Control::TransitionToOperational() {
+  transition_to_operational_ = true;
 }
 
 void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
   const bool new_state = state_ != last_state_;
   switch(state_) {
     case State::kIdle:
-       output->motor_enable = false;
-       output->piston_state = PistonState::Up;
-       last_idle_micros_ = micros;
-       break;
+      transition_to_operational_ = false;
+      output->motor_enable = false;
+      output->piston_state = PistonState::Up;
+      last_idle_micros_ = micros;
+      if (line_sensor_.MaybeOutput_mm().valid) {
+        state_ = State::kIdleReady;
+      }
+      break;
+    case State::kIdleReady:
+      output->motor_enable = false;
+      output->piston_state = PistonState::Up;
+      last_idle_micros_ = micros;
+      if (!line_sensor_.MaybeOutput_mm().valid) {
+        state_ = State::kIdle;
+      } else if (transition_to_operational_) {
+        state_ = State::kWaitForReady;
+      }
+      break;
     case State::kWaitForReady: {
       output->motor_enable = false;
       output->piston_state = PistonState::Down;
@@ -107,7 +115,9 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
       if (!maybe_line.valid) {
         state_ = State::kWaitForReady;
-        break;
+        transition_to_operational_ = false;
+      } else if (transition_to_operational_) {
+        state_ = State::kOperational;
       }
       break;
     }
@@ -115,6 +125,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       if (new_state) {
         last_error_ = 0;
         operational_start_micros_ = micros;
+        transition_to_operational_ = false;
       }
 
       const uint32_t micros_since_operational_start =

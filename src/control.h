@@ -13,6 +13,7 @@ class Control {
 public:
   enum class State {
     kIdle,
+    kIdleReady,
     kWaitForReady,
     kReady,
     kOperational
@@ -58,6 +59,8 @@ private:
   float last_error_;
   
   uint32_t operational_start_micros_;
+
+  bool transition_to_operational_;
 
   float pid_kp_;
   float pid_kd_;  
