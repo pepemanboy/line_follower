@@ -142,7 +142,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         char float_buf[10];
         dtostrf(maybe_line.value.std_dev, 7, 3, float_buf);
         char buf[30];
-        sprintf(buf, "Line error %s", float_buf);            
+        sprintf(buf, "Line error %s\n", float_buf);            
         Bluetooth.println(buf);
         state_ = State::kIdle;
         break;
@@ -157,7 +157,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
             char float_buf[10];
             dtostrf(current_sensors_[i].Output_Amps(), 7, 3, float_buf);
             char buf[30];
-            sprintf(buf, "Overcurrent %s A", float_buf);            
+            sprintf(buf, "Overcurrent %s A\n", float_buf);            
             Bluetooth.println(buf);
           }
         }
