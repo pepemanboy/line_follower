@@ -19,7 +19,7 @@ constexpr float kMaxPwmDc = 0.8;
 constexpr float kMaxCurrent_A = 1000;
 constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
-constexpr int32_t kMotorStartUp_micros = 1000000;
+constexpr int32_t kMotorStartUp_micros = 3000000;
 
 namespace line_follower {
 

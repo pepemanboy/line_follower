@@ -304,7 +304,7 @@ void LineFollowerStartupTest::LineFollowerTest() {
       char float_buf[10];
       dtostrf(max_current_A, 7, 4, float_buf);
       char buf[30];
-      sprintf(buf, "Max current = %s", float_buf);
+      sprintf(buf, "%s", float_buf);
       Bluetooth.println(buf);
     }
   }
@@ -377,7 +377,7 @@ void LineFollowerStartupTest::AdjustPidKd() {
 
 void LineFollowerStartupTest::Init() {
   HardwareInit();
-  Bluetooth.begin(115200);
+  Bluetooth.begin(19200);
 }
 
 void LineFollowerStartupTest::Poll(uint32_t micros) {
