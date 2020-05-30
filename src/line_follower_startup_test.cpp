@@ -377,7 +377,7 @@ void LineFollowerStartupTest::AdjustPidKd() {
 
 void LineFollowerStartupTest::Init() {
   HardwareInit();
-  Bluetooth.begin(19200);
+  Bluetooth.begin(9600);
 }
 
 void LineFollowerStartupTest::Poll(uint32_t micros) {
