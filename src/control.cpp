@@ -130,7 +130,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 
       const uint32_t micros_since_operational_start =
         micros - operational_start_micros_; 
-      const bool motor_startup_finished = micros_since_operational_start < 
+      const bool motor_startup_finished = micros_since_operational_start > 
         kMotorStartUp_micros;
 
       // Check for valid line reading.
