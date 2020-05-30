@@ -1,6 +1,9 @@
 #include "control.h"
 #include "hardware.h"
 #include "util.h"
+#include "Arduino.h"
+
+#define Bluetooth Serial2
 
 // undefine stdlib's abs if encountered
 #ifdef abs
@@ -136,6 +139,11 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
       if (!maybe_line.valid) {
+        char float_buf[10];
+        dtostrf(maybe_line.value.std_dev, 7, 3, float_buf);
+        char buf[30];
+        sprintf(buf, "Line error %s", float_buf);            
+        Bluetooth.println(buf);
         state_ = State::kIdle;
         break;
       }
@@ -146,6 +154,11 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         for (int i = 0; i < kNumCurrentSensors; ++i) {
           if (abs(current_sensors_[i].Output_Amps()) >= kMaxCurrent_A) {
             overcurrent = true;
+            char float_buf[10];
+            dtostrf(current_sensors_[i].Output_Amps(), 7, 3, float_buf);
+            char buf[30];
+            sprintf(buf, "Overcurrent %s A", float_buf);            
+            Bluetooth.println(buf);
           }
         }
         if (overcurrent) {

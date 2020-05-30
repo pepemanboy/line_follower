@@ -10,11 +10,11 @@
 #include "button_debounce.h"
 #include "line_follower.h"
 
+#define Bluetooth Serial2
+
 namespace line_follower {
 
 LineFollowerStartupTest::LineFollowerStartupTest() {}
-
-#define Bluetooth Serial2
 
 int TestPrompt(const char * prompt) {
   Bluetooth.print(prompt);
@@ -300,7 +300,7 @@ void LineFollowerStartupTest::LineFollowerTest() {
 
     // Print max current.    
     const float max_current_A = robot.MaxCurrent_A();
-    if (max_current_A > 4.0f) {
+    if (max_current_A > 8.0f) {
       char float_buf[10];
       dtostrf(max_current_A, 7, 4, float_buf);
       char buf[30];
