@@ -3,7 +3,7 @@
 #include "constants.h"
 
 constexpr float kMaxCurrent_A = 30.0f;
-constexpr float kFilterWeight = 0.5f;
+constexpr float kFilterWeight = 0.8f;
 
 namespace line_follower {
 
