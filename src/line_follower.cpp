@@ -78,15 +78,15 @@ void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
       red = toggle_state;
       sound = toggle_state;
       break;
+    case Control::State::kOperationalPause:
+      red = true;
+      sound = false;
+      break;
   }
   SetTowerLight(TowerLight::Red, red);
   SetTowerLight(TowerLight::Green, green);
   SetTowerLight(TowerLight::Yellow, yellow);
   SetTowerSound(/*sound*/ false);
-}
-
-float LineFollower::MaxCurrent_A() {
-  return control_.MaxCurrent_A();
 }
 
 }  // namespace line_follower

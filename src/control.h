@@ -16,7 +16,8 @@ public:
     kIdleReady,
     kWaitForReady,
     kReady,
-    kOperational
+    kOperational,
+    kOperationalPause,
   };
   
   struct ControlOutput {
@@ -30,9 +31,7 @@ public:
   void Reset();
   void Poll(uint32_t micros, ControlOutput *output);
 
-  void TransitionToReady();
   void TransitionToOperational();
-  void TransitionToIdle();
   void TransitionDown();
   void TransitionUp();
 
@@ -42,23 +41,18 @@ public:
   void set_pid_kd(float pid_kd) { pid_kd_ = pid_kd; }
   float pid_kd() { return pid_kd_; }
 
-  float MaxCurrent_A();
-
-
 private:  
   void RunStateMachine(uint32_t micros, ControlOutput *output);
-
+  bool IsLineSensorCentered();
   LineSensor line_sensor_ = {};
   CurrentSensor current_sensors_[kNumCurrentSensors] = {};
+  bool obstacle_present_ = false;
 
-  State command_;
   State state_;
   State last_state_;
   uint32_t last_idle_micros_;
   uint32_t last_micros_;
   float last_error_;
-  
-  uint32_t operational_start_micros_;
 
   bool transition_to_operational_;
 

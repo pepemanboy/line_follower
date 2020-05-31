@@ -149,7 +149,6 @@ void LineFollowerStartupTest::LineSensorsTest() {
     Bluetooth.println("Piston going down");
     SetPiston(PistonState::Down);
     delay(10000);
-    SetPiston(PistonState::Idle);
   } else {
     Bluetooth.println("Piston staying up");
     SetPiston(PistonState::Up);
@@ -198,8 +197,9 @@ void LineFollowerStartupTest::LineSensorsTest() {
     Bluetooth.println();
     delay(1000);
   }
-
   Bluetooth.read();
+
+  SetPiston(PistonState::Up);
 }
 
 void LineFollowerStartupTest::CurrentSensorsTest() {
@@ -271,8 +271,8 @@ void LineFollowerStartupTest::ButtonsTest() {
 
 void LineFollowerStartupTest::LineFollowerTest() {
   Bluetooth.println("Line follower test!");
-  Bluetooth.println("Press Up button to transition up");
-  Bluetooth.println("Press Down button to transition down");
+  Bluetooth.println("Press Up button to go operational");
+  Bluetooth.println("Press Down button to idle");
 
   LineFollower robot;
   robot.Init();
@@ -297,16 +297,6 @@ void LineFollowerStartupTest::LineFollowerTest() {
 
   while(!Bluetooth.available()) {
     robot.Poll(micros());
-
-    // Print max current.    
-    const float max_current_A = robot.MaxCurrent_A();
-    if (max_current_A > 4.0f) {
-      char float_buf[10];
-      dtostrf(max_current_A, 7, 4, float_buf);
-      char buf[30];
-      sprintf(buf, "%s", float_buf);
-      Bluetooth.println(buf);
-    }
   }
   
   Bluetooth.read();

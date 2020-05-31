@@ -15,14 +15,19 @@
   #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#ifndef min
+  #define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 constexpr int32_t kPistonReady_micros = 10000000;
-constexpr float kBasePwmDc = 0.5;
-constexpr float kMinPwmDc = 0;
-constexpr float kMaxPwmDc = 0.8;
-constexpr float kMaxCurrent_A = 1000;
-constexpr float kPidKp = 0.0012;
-constexpr float kPidKd = 6;
-constexpr int32_t kMotorStartUp_micros = 3000000;
+constexpr float kBaseRate_PwmDc = 0.5f;
+constexpr float kMinRate_PwmDc = 0.0f;
+constexpr float kMaxRate_PwmDc = 0.8f;
+constexpr float kMaxAccel_PwmDc_s = 0.5f; 
+constexpr float kMaxCurrent_A = 20.0f;
+constexpr float kPidKp = 0.0012f;
+constexpr float kPidKd = 6.0f;
+constexpr float kLineCentered_mm = 62.5f;
 
 namespace line_follower {
 
@@ -37,6 +42,8 @@ void Control::Reset() {
   for(int i = 0; i < kNumCurrentSensors; ++i) {
     current_sensors_[i].Reset();
   }
+  obstacle_present_ = false;
+
   state_ = State::kIdle;
   last_state_ = State::kIdle;
   last_idle_micros_ = 0;
@@ -58,6 +65,9 @@ void Control::Poll(uint32_t micros, ControlOutput *output) {
   for (int i = 0; i < kNumCurrentSensors; ++i) {
     current_sensors_[i].OnAnalogSample(current_readings[i]);
   }
+
+  // Read range sensor.
+  obstacle_present_ = ReadRangeSensor();
 
   RunStateMachine(micros, output);
 }
@@ -81,6 +91,12 @@ void Control::TransitionToOperational() {
   transition_to_operational_ = true;
 }
 
+bool Control:: IsLineSensorCentered() {
+  const auto line_reading = line_sensor_.MaybeOutput_mm();
+  return line_reading.valid && 
+    abs(line_reading.value.average) < kLineCentered_mm;  
+}
+
 void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
   const bool new_state = state_ != last_state_;
   switch(state_) {
@@ -89,7 +105,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       output->motor_enable = false;
       output->piston_state = PistonState::Up;
       last_idle_micros_ = micros;
-      if (line_sensor_.MaybeOutput_mm().valid) {
+      if (IsLineSensorCentered()) {
         state_ = State::kIdleReady;
       }
       break;
@@ -97,7 +113,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       output->motor_enable = false;
       output->piston_state = PistonState::Up;
       last_idle_micros_ = micros;
-      if (!line_sensor_.MaybeOutput_mm().valid) {
+      if (!IsLineSensorCentered()) {
         state_ = State::kIdle;
       } else if (transition_to_operational_) {
         state_ = State::kWaitForReady;
@@ -109,14 +125,13 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       if (micros - last_idle_micros_ < kPistonReady_micros) {
         break;
       }
-      if (line_sensor_.MaybeOutput_mm().valid) {
+      if (IsLineSensorCentered()) {
         state_ = State::kReady;
       }
       break;
     }
     case State::kReady: {
-      const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
-      if (!maybe_line.valid) {
+      if (!IsLineSensorCentered()) {
         state_ = State::kWaitForReady;
         transition_to_operational_ = false;
       } else if (transition_to_operational_) {
@@ -127,14 +142,11 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
     case State::kOperational: {
       if (new_state) {
         last_error_ = 0;
-        operational_start_micros_ = micros;
         transition_to_operational_ = false;
+        for (int i = 0; i < 2; ++i) {
+          output->motor_pwm[0] = 0.0f;
+        }      
       }
-
-      const uint32_t micros_since_operational_start =
-        micros - operational_start_micros_; 
-      const bool motor_startup_finished = micros_since_operational_start > 
-        kMotorStartUp_micros;
 
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
@@ -148,49 +160,55 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         break;
       }
       
-      // Overcurrent / torque protection.
-      if (motor_startup_finished) {
-        bool overcurrent = false;
-        for (int i = 0; i < kNumCurrentSensors; ++i) {
-          if (abs(current_sensors_[i].Output_Amps()) >= kMaxCurrent_A) {
-            overcurrent = true;
-            char float_buf[10];
-            dtostrf(current_sensors_[i].Output_Amps(), 7, 3, float_buf);
-            char buf[30];
-            sprintf(buf, "Overcurrent %s A", float_buf);            
-            Bluetooth.println(buf);
-          }
+      // Overcurrent protection.
+      bool overcurrent = false;
+      for (int i = 0; i < kNumCurrentSensors; ++i) {
+        if (abs(current_sensors_[i].Output_Amps()) >= kMaxCurrent_A) {
+          overcurrent = true;
         }
-        if (overcurrent) {
-          state_ = State::kIdle;
-          break;
-        }
-      }      
+      }
+      if (overcurrent) {
+        state_ = State::kIdle;
+        break;
+      }
+
+      // Check for obstacles.
+      if (obstacle_present_) {
+        state_ = State::kOperationalPause;
+        break;
+      } 
 
       // Run PD controller.
       const float error = maybe_line.value.average;
-      const float dt_s = (micros - last_micros_) / 1000000.0f;
-      if (dt_s == 0) break;
+      const float dt_s = (micros - last_micros_)  * 1e-6f;
+      if (dt_s == 0.0f) break;
       const float d_output = (error - last_error_) / dt_s * pid_kd_;
       const float pd_output = pid_kp_ * (error + d_output);
       last_error_ = error;
 
+      // Update motor output.
+      const float max_pwm_delta = kMaxAccel_PwmDc_s * dt_s; // Limit accel.
       output->motor_pwm[0] = 
-        ClampToRange(kBasePwmDc + pd_output, kMinPwmDc, kMaxPwmDc);
+        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, 
+          min(kMaxRate_PwmDc, output->motor_pwm[0] + max_pwm_delta));
       output->motor_pwm[1] =
-        ClampToRange(kBasePwmDc - pd_output, kMinPwmDc, kMaxPwmDc);
+        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, 
+          min(kMaxRate_PwmDc, output->motor_pwm[1] + max_pwm_delta));
       output->motor_enable = true;
 
-      // Ramp up on motor start up.
-      if (!motor_startup_finished) {
-        const float ramp = micros_since_operational_start / 
-          (float) kMotorStartUp_micros;
-        for (int i = 0; i < 2; ++i) {
-          output->motor_pwm[i] *= ramp;
-        }
+      break;
+    }
+    case State::kOperationalPause: {
+      // Stop motors.
+      for (int i = 0; i < 2; ++i) {
+        output->motor_pwm[0] = 0.0f;
       }
 
-      break;
+      // Check for obstacles.
+      if (!obstacle_present_) {
+        state_ = State::kOperational;
+        break;
+      } 
     }
   }
 
@@ -198,15 +216,6 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
   output->state = last_state_;
   last_state_ = state_;
   last_micros_ = micros;    
-}
-
-float Control::MaxCurrent_A() {
-  float max_current_A = 0;
-  for (int i = 0; i < kNumCurrentSensors; ++i) {
-    max_current_A += abs(current_sensors_[i].Output_Amps());
-  }
-  max_current_A /= 2.0f;
-  return max_current_A;
 }
 
 }  // namespace line_follower

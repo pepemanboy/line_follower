@@ -24,8 +24,6 @@ public:
   void SetControlPidKd(float pid_kd) { control_.set_pid_kd(pid_kd); }
   float ControlPidKd() { return control_.pid_kd(); }
 
-  float MaxCurrent_A();
-
 private:
   void UpdateTower(uint32_t micros, Control::State state);  
   Control control_ = {};
