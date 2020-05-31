@@ -375,6 +375,27 @@ void LineFollowerStartupTest::AdjustPidKd() {
   }
 }
 
+void RangeSensorTest() {
+  Bluetooth.println("Range sensor test!");
+  Bluetooth.println("Green light if OK, Red light if obstacle present");
+
+  while(!Bluetooth.available()) {
+    bool obstacle_present = ReadRangeSensor();
+    if (obstacle_present) {
+      SetTowerLight(TowerLight::Green, false);
+      SetTowerLight(TowerLight::Red, true);
+    } else {
+      SetTowerLight(TowerLight::Green, true);
+      SetTowerLight(TowerLight::Red, false);
+    }
+    delay(100);
+  }
+  Bluetooth.read();
+
+  SetTowerLight(TowerLight::Green, false);
+  SetTowerLight(TowerLight::Red, false);
+}
+
 void LineFollowerStartupTest::Init() {
   HardwareInit();
   Bluetooth.begin(9600);
@@ -391,6 +412,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Line follower test: Press 5");
   Bluetooth.println("Adjust PID Kp: Press 6");
   Bluetooth.println("Adjust PID Kd: Press 7");
+  Bluetooth.println("Range sensor test: Press 8");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
@@ -401,6 +423,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
     case 5: LineFollowerTest(); break;
     case 6: AdjustPidKp(); break;
     case 7: AdjustPidKd(); break;
+    case 8: RangeSensorTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;

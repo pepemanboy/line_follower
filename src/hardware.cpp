@@ -34,6 +34,8 @@ void HardwareInit() {
   pinMode(kButtonUpPin, INPUT);
   pinMode(kButtonDownPin, INPUT);
 
+  pinMode(kRangeSensorPin, INPUT);
+
   pinMode(kPistonPlusPin, OUTPUT);
   pinMode(kPistonMinusPin, OUTPUT);
   SetPiston(PistonState::Idle);
@@ -69,6 +71,10 @@ bool ReadButton(Button button) {
     case Button::Down: return !digitalRead(kButtonDownPin);
   }
   return false;  // Shall never get here.
+}
+
+bool ReadRangeSensor() {
+  return !digitalRead(kRangeSensorPin);
 }
 
 void SetTowerLight(TowerLight light, bool state) {
