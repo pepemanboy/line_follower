@@ -365,7 +365,7 @@ void LineFollowerStartupTest::AdjustPidKd() {
   }
 }
 
-void RangeSensorTest() {
+void LineFollowerStartupTest::RangeSensorTest() {
   Bluetooth.println("Range sensor test!");
   Bluetooth.println("Green light if OK, Red light if obstacle present");
 
