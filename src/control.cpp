@@ -203,8 +203,9 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 float Control::MaxCurrent_A() {
   float max_current_A = 0;
   for (int i = 0; i < kNumCurrentSensors; ++i) {
-    max_current_A = max(max_current_A, current_sensors_[i].Output_Amps());
+    max_current_A += abs(current_sensors_[i].Output_Amps());
   }
+  max_current_A /= 2.0f;
   return max_current_A;
 }
 
