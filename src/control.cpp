@@ -28,10 +28,12 @@ constexpr float kMaxCurrent_A = 20.0f;
 constexpr float kPidKp = 0.0012f;
 constexpr float kPidKd = 6.0f;
 constexpr float kLineCentered_mm = 62.5f;
+constexpr float kObstaclePresentHold_micros = 1000000;
 
 namespace line_follower {
 
-Control::Control() {
+Control::Control():
+  obstacle_present_(kObstaclePresentHold_micros) {
   Reset();
   pid_kp_ = kPidKp;
   pid_kd_ = kPidKd;
@@ -42,7 +44,6 @@ void Control::Reset() {
   for(int i = 0; i < kNumCurrentSensors; ++i) {
     current_sensors_[i].Reset();
   }
-  obstacle_present_ = false;
 
   state_ = State::kIdle;
   last_state_ = State::kIdle;
@@ -67,7 +68,7 @@ void Control::Poll(uint32_t micros, ControlOutput *output) {
   }
 
   // Read range sensor.
-  obstacle_present_ = ReadRangeSensor();
+  obstacle_present_.OnDigitalRead(micros, ReadRangeSensor());
 
   RunStateMachine(micros, output);
 }
@@ -173,7 +174,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       }
 
       // Check for obstacles.
-      if (obstacle_present_) {
+      if (obstacle_present_.output()) {
         state_ = State::kOperationalPause;
         break;
       } 
@@ -205,7 +206,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       }
 
       // Check for obstacles.
-      if (!obstacle_present_) {
+      if (!obstacle_present_.output()) {
         state_ = State::kOperational;
         break;
       } 

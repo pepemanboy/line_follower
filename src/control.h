@@ -5,6 +5,7 @@
 
 #include "line_sensor.h"
 #include "current_sensor.h"
+#include "sample_hold.h"
 #include "hardware.h"
 
 namespace line_follower {
@@ -46,7 +47,7 @@ private:
   bool IsLineSensorCentered();
   LineSensor line_sensor_ = {};
   CurrentSensor current_sensors_[kNumCurrentSensors] = {};
-  bool obstacle_present_ = false;
+  SampleHold obstacle_present_;
 
   State state_;
   State last_state_;
