@@ -28,7 +28,7 @@ constexpr float kMaxCurrent_A = 20.0f;
 constexpr float kPidKp = 0.0012f;
 constexpr float kPidKd = 6.0f;
 constexpr float kLineCentered_mm = 62.5f;
-constexpr float kObstaclePresentHold_micros = 1000000;
+constexpr float kObstaclePresentHold_micros = 1100000;
 
 namespace line_follower {
 
