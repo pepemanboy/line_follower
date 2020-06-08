@@ -74,7 +74,7 @@ bool ReadButton(Button button) {
 }
 
 bool ReadRangeSensor() {
-  return digitalRead(kRangeSensorPin);
+  return !digitalRead(kRangeSensorPin);
 }
 
 void SetTowerLight(TowerLight light, bool state) {

@@ -23,7 +23,7 @@ constexpr int kTowerSoundPin = 39;
 constexpr int kButtonDownPin = 51;
 constexpr int kButtonUpPin = 53;
 
-constexpr int kRangeSensorPin = 47;
+constexpr int kRangeSensorPin = 49;
 
 constexpr int kPistonPlusPin = 37;
 constexpr int kPistonMinusPin = 35;
