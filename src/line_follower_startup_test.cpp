@@ -149,7 +149,6 @@ void LineFollowerStartupTest::LineSensorsTest() {
     Bluetooth.println("Piston going down");
     SetPiston(PistonState::Down);
     delay(10000);
-    SetPiston(PistonState::Idle);
   } else {
     Bluetooth.println("Piston staying up");
     SetPiston(PistonState::Up);
@@ -198,8 +197,9 @@ void LineFollowerStartupTest::LineSensorsTest() {
     Bluetooth.println();
     delay(1000);
   }
-
   Bluetooth.read();
+
+  SetPiston(PistonState::Up);
 }
 
 void LineFollowerStartupTest::CurrentSensorsTest() {
@@ -271,8 +271,8 @@ void LineFollowerStartupTest::ButtonsTest() {
 
 void LineFollowerStartupTest::LineFollowerTest() {
   Bluetooth.println("Line follower test!");
-  Bluetooth.println("Press Up button to transition up");
-  Bluetooth.println("Press Down button to transition down");
+  Bluetooth.println("Press Up button to go operational");
+  Bluetooth.println("Press Down button to idle");
 
   LineFollower robot;
   robot.Init();
@@ -297,16 +297,6 @@ void LineFollowerStartupTest::LineFollowerTest() {
 
   while(!Bluetooth.available()) {
     robot.Poll(micros());
-
-    // Print max current.    
-    const float max_current_A = robot.MaxCurrent_A();
-    if (max_current_A > 4.0f) {
-      char float_buf[10];
-      dtostrf(max_current_A, 7, 4, float_buf);
-      char buf[30];
-      sprintf(buf, "%s", float_buf);
-      Bluetooth.println(buf);
-    }
   }
   
   Bluetooth.read();
@@ -375,6 +365,32 @@ void LineFollowerStartupTest::AdjustPidKd() {
   }
 }
 
+void LineFollowerStartupTest::RangeSensorTest() {
+  Bluetooth.println("Range sensor test!");
+  Bluetooth.println("Green light if OK, Red light if obstacle present");
+
+  SampleHold obstacle_present(1100000);
+
+  while(!Bluetooth.available()) {
+    const bool range_sensor = ReadRangeSensor();
+    obstacle_present.OnDigitalRead(micros(), range_sensor);
+    if (obstacle_present.output()) {
+      SetTowerLight(TowerLight::Green, false);
+      SetTowerLight(TowerLight::Red, true);
+    } else {
+      SetTowerLight(TowerLight::Green, true);
+      SetTowerLight(TowerLight::Red, false);
+    }
+    SetTowerLight(TowerLight::Yellow, range_sensor);  // Raw sensor.
+    delay(10);
+  }
+  Bluetooth.read();
+
+  SetTowerLight(TowerLight::Green, false);
+  SetTowerLight(TowerLight::Red, false);
+  SetTowerLight(TowerLight::Yellow, false);
+}
+
 void LineFollowerStartupTest::Init() {
   HardwareInit();
   Bluetooth.begin(9600);
@@ -391,6 +407,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Line follower test: Press 5");
   Bluetooth.println("Adjust PID Kp: Press 6");
   Bluetooth.println("Adjust PID Kd: Press 7");
+  Bluetooth.println("Range sensor test: Press 8");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
@@ -401,6 +418,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
     case 5: LineFollowerTest(); break;
     case 6: AdjustPidKp(); break;
     case 7: AdjustPidKd(); break;
+    case 8: RangeSensorTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;

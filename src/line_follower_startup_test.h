@@ -21,6 +21,7 @@ private:
   void LineFollowerTest();
   void AdjustPidKp();
   void AdjustPidKd();
+  void RangeSensorTest();
 
   float ReadBluetoothFloat();
 
