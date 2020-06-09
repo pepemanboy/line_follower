@@ -199,9 +199,9 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         min(kMaxRate_PwmDc, output->motor_pwm[0] + max_pwm_delta),
         min(kMaxRate_PwmDc, output->motor_pwm[1] + max_pwm_delta)};
       output->motor_pwm[0] = 
-        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, max_pwm[0]);
+        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, kMaxRate_PwmDc);
       output->motor_pwm[1] =
-        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, max_pwm[1]);
+        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, kMaxRate_PwmDc);
       output->motor_enable = true;
 
       break;
