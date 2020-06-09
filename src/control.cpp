@@ -20,15 +20,15 @@
 #endif
 
 constexpr int32_t kPistonReady_micros = 10000000;
-constexpr float kBaseRate_PwmDc = 0.5f;
-constexpr float kMinRate_PwmDc = 0.0f;
-constexpr float kMaxRate_PwmDc = 0.8f;
-constexpr float kMaxAccel_PwmDc_s = 0.5f; 
-constexpr float kMaxCurrent_A = 20.0f;
-constexpr float kPidKp = 0.0012f;
-constexpr float kPidKd = 6.0f;
-constexpr float kLineCentered_mm = 62.5f;
-constexpr float kObstaclePresentHold_micros = 1100000;
+constexpr float kBaseRate_PwmDc = 0.5;
+constexpr float kMinRate_PwmDc = 0.0;
+constexpr float kMaxRate_PwmDc = 0.8;
+constexpr float kMaxAccel_PwmDc_s = 0.5; 
+constexpr float kMaxCurrent_A = 20.0;
+constexpr float kPidKp = 0.0012;
+constexpr float kPidKd = 6.0;
+constexpr float kLineCentered_mm = 62.5;
+constexpr int32_t kObstaclePresentHold_micros = 1100000;
 
 namespace line_follower {
 
@@ -150,7 +150,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         last_error_ = 0;
         transition_to_operational_ = false;
         for (int i = 0; i < 2; ++i) {
-          output->motor_pwm[0] = 0.0f;
+          output->motor_pwm[0] = 0;
         }   
         Bluetooth.println("Reset operational");   
       }
@@ -187,8 +187,8 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 
       // Run PD controller.
       const float error = maybe_line.value.average;
-      const float dt_s = (micros - last_micros_)  * 1e-6f;
-      if (dt_s == 0.0f) break;
+      const float dt_s = (micros - last_micros_)  / 1000000.0;
+      if (dt_s == 0) break;
       const float d_output = (error - last_error_) / dt_s * pid_kd_;
       const float pd_output = pid_kp_ * (error + d_output);
       last_error_ = error;
@@ -209,7 +209,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
     case State::kOperationalPause: {
       // Stop motors.
       for (int i = 0; i < 2; ++i) {
-        output->motor_pwm[0] = 0.0f;
+        output->motor_pwm[0] = 0;
       }
 
       // Check for obstacles.
