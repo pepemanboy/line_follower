@@ -21,12 +21,12 @@
 
 constexpr int32_t kPistonReady_micros = 10000000;
 constexpr float kBaseRate_PwmDc = 0.5;
-constexpr float kMinRate_PwmDc = 0.0;
+constexpr float kMinRate_PwmDc = 0;
 constexpr float kMaxRate_PwmDc = 0.8;
 constexpr float kMaxAccel_PwmDc_s = 0.5; 
-constexpr float kMaxCurrent_A = 20.0;
+constexpr float kMaxCurrent_A = 1000;
 constexpr float kPidKp = 0.0012;
-constexpr float kPidKd = 6.0;
+constexpr float kPidKd = 6;
 constexpr float kLineCentered_mm = 62.5;
 constexpr int32_t kObstaclePresentHold_micros = 1100000;
 
@@ -176,18 +176,20 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       }
       if (overcurrent) {
         state_ = State::kIdle;
+        Bluetooth.println("Overcurrent"); 
         break;
       }
 
       // Check for obstacles.
       if (obstacle_present_.output()) {
         state_ = State::kOperationalPause;
+        Bluetooth.println("Obstacle detected"); 
         break;
       } 
 
       // Run PD controller.
       const float error = maybe_line.value.average;
-      const float dt_s = (micros - last_micros_)  / 1000000.0;
+      const float dt_s = (micros - last_micros_) / 1000000.0f;
       if (dt_s == 0) break;
       const float d_output = (error - last_error_) / dt_s * pid_kd_;
       const float pd_output = pid_kp_ * (error + d_output);
@@ -215,6 +217,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       // Check for obstacles.
       if (!obstacle_present_.output()) {
         state_ = State::kOperational;
+        Bluetooth.println("Back to operational"); 
         break;
       } 
       break;
