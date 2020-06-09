@@ -5,7 +5,7 @@
 
 #define Bluetooth Serial2
 
-// undefine stdlib's abs if encountered
+// undefine stdlib's abs if encountered.
 #ifdef abs
 #undef abs
 #endif
