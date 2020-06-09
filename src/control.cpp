@@ -99,7 +99,12 @@ bool Control:: IsLineSensorCentered() {
 }
 
 void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
+  // Check for new state and update last state.
   const bool new_state = state_ != last_state_;
+  output->state = last_state_;
+  last_state_ = state_;
+
+  // FSM.
   switch(state_) {
     case State::kIdle:
       transition_to_operational_ = false;
@@ -146,7 +151,8 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         transition_to_operational_ = false;
         for (int i = 0; i < 2; ++i) {
           output->motor_pwm[0] = 0.0f;
-        }      
+        }   
+        Bluetooth.println("Reset operational");   
       }
 
       // Check for valid line reading.
@@ -189,12 +195,13 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 
       // Update motor output.
       const float max_pwm_delta = kMaxAccel_PwmDc_s * dt_s; // Limit accel.
+      const float max_pwm[2] = {
+        min(kMaxRate_PwmDc, output->motor_pwm[0] + max_pwm_delta),
+        min(kMaxRate_PwmDc, output->motor_pwm[1] + max_pwm_delta)};
       output->motor_pwm[0] = 
-        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, 
-          min(kMaxRate_PwmDc, output->motor_pwm[0] + max_pwm_delta));
+        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, max_pwm[0]);
       output->motor_pwm[1] =
-        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, 
-          min(kMaxRate_PwmDc, output->motor_pwm[1] + max_pwm_delta));
+        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, max_pwm[1]);
       output->motor_enable = true;
 
       break;
@@ -210,12 +217,10 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         state_ = State::kOperational;
         break;
       } 
+      break;
     }
   }
-
-  // Update.
-  output->state = last_state_;
-  last_state_ = state_;
+  
   last_micros_ = micros;    
 }
 
