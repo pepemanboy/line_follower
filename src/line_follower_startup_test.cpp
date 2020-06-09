@@ -372,7 +372,7 @@ void LineFollowerStartupTest::RangeSensorTest() {
   SampleHold obstacle_present(1100000);
 
   while(!Bluetooth.available()) {
-    bool range_sensor = ReadRangeSensor();
+    const bool range_sensor = ReadRangeSensor();
     obstacle_present.OnDigitalRead(micros(), range_sensor);
     if (obstacle_present.output()) {
       SetTowerLight(TowerLight::Green, false);
@@ -388,6 +388,7 @@ void LineFollowerStartupTest::RangeSensorTest() {
 
   SetTowerLight(TowerLight::Green, false);
   SetTowerLight(TowerLight::Red, false);
+  SetTowerLight(TowerLight::Yellow, false);
 }
 
 void LineFollowerStartupTest::Init() {
