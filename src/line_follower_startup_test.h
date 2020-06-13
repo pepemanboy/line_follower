@@ -22,8 +22,10 @@ private:
   void AdjustPidKp();
   void AdjustPidKd();
   void RangeSensorTest();
+  void MotorsTest();
 
   float ReadBluetoothFloat();
+  int ReadBluetoothInt();
 
   float pid_kp_ = -1;
   float pid_kd_ = -1;

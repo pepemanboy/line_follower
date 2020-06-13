@@ -315,8 +315,33 @@ float LineFollowerStartupTest::ReadBluetoothFloat() {
       buf[buf_index++] = read;  
     }
   }
+  delay(100);
+  if (Bluetooth.available()) {
+    Bluetooth.read();
+  }
 
   return atof(buf);
+}
+
+int LineFollowerStartupTest::ReadBluetoothInt() {
+  constexpr uint8_t buf_size = 10;
+  uint8_t buf_index = 0;
+  char buf[buf_size] = {0};
+
+  while(buf_index < buf_size - 1) {
+    if (Bluetooth.available()) {
+      char read = Bluetooth.read();          
+      Bluetooth.print(read);
+      if (read == '\n' || read == '\r') break;
+      buf[buf_index++] = read;  
+    }
+  }
+  delay(100);
+  if (Bluetooth.available()) {
+    Bluetooth.read();
+  }
+
+  return atoi(buf);
 }
 
 void LineFollowerStartupTest::AdjustPidKp() {
@@ -391,6 +416,70 @@ void LineFollowerStartupTest::RangeSensorTest() {
   SetTowerLight(TowerLight::Yellow, false);
 }
 
+void LineFollowerStartupTest::MotorsTest() {
+  Bluetooth.println("Which motor? (0 left, 1 right, 2 both)");
+  const int motor_number = ReadBluetoothInt(); 
+
+  if (motor_number < 0 || motor_number > 2) {
+    Bluetooth.println("Bad motor number, exiting");
+    return;
+  }
+
+  Bluetooth.println("PWM duty cycle?");
+  const float pwm_dc = ReadBluetoothFloat();
+
+  if (abs(pwm_dc) > 1) {
+    Bluetooth.println("Bad pwm dc, exiting");
+    return;
+  }
+
+  char float_str[20];
+  dtostrf(pwm_dc, 7, 4, float_str);
+  char buf[50];
+  sprintf(buf, "Motor %d, pwm %s, press '1' for OK", motor_number, float_str);
+  Bluetooth.println(buf);
+
+  while(!Bluetooth.available()) {
+    delay(100);
+  }
+  char read = Bluetooth.read();
+
+  if (read != '1') {
+    Bluetooth.println("Exiting");
+    return;
+  }
+
+  Bluetooth.println("Press any key to exit");
+
+  EnableMotor(Motor::Left, true);
+  EnableMotor(Motor::Right, true);
+
+  switch(motor_number) {
+    case 0:
+      SetMotorPwm(Motor::Left, pwm_dc);
+      SetMotorPwm(Motor::Right, 0);
+      break;
+    case 1:
+      SetMotorPwm(Motor::Left, 0);
+      SetMotorPwm(Motor::Right, pwm_dc);
+      break;
+    case 2:
+      SetMotorPwm(Motor::Left, pwm_dc);
+      SetMotorPwm(Motor::Right, pwm_dc);
+      break;
+  }
+
+  while(!Bluetooth.available()) {
+    delay(100);
+  }
+  read = Bluetooth.read();
+
+  EnableMotor(Motor::Left, false);
+  EnableMotor(Motor::Right, false);
+  SetMotorPwm(Motor::Left, 0);
+  SetMotorPwm(Motor::Right, 0);
+}
+
 void LineFollowerStartupTest::Init() {
   HardwareInit();
   Bluetooth.begin(9600);
@@ -408,6 +497,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Adjust PID Kp: Press 6");
   Bluetooth.println("Adjust PID Kd: Press 7");
   Bluetooth.println("Range sensor test: Press 8");
+  Bluetooth.println("Motors test: Press 9");
   int option = TestPrompt("Choose a test") - (int)'0';
 
   switch(option) {
@@ -419,6 +509,7 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
     case 6: AdjustPidKp(); break;
     case 7: AdjustPidKd(); break;
     case 8: RangeSensorTest(); break;
+    case 9: MotorsTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;
