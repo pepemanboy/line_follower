@@ -453,19 +453,20 @@ void LineFollowerStartupTest::MotorsTest() {
 
   EnableMotor(Motor::Left, true);
   EnableMotor(Motor::Right, true);
+  SetPiston(PistonState::Down);
 
   switch(motor_number) {
     case 0:
-      SetMotorPwm(Motor::Left, pwm_dc);
+      SetMotorPwm(Motor::Left, pwm_dc * 255.0);
       SetMotorPwm(Motor::Right, 0);
       break;
     case 1:
       SetMotorPwm(Motor::Left, 0);
-      SetMotorPwm(Motor::Right, pwm_dc);
+      SetMotorPwm(Motor::Right, pwm_dc * 255.0);
       break;
     case 2:
-      SetMotorPwm(Motor::Left, pwm_dc);
-      SetMotorPwm(Motor::Right, pwm_dc);
+      SetMotorPwm(Motor::Left, pwm_dc * 255.0);
+      SetMotorPwm(Motor::Right, pwm_dc * 255.0);
       break;
   }
 
