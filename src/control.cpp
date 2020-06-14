@@ -1,9 +1,6 @@
 #include "control.h"
 #include "hardware.h"
 #include "util.h"
-#include "Arduino.h"
-
-#define Bluetooth Serial2
 
 // undefine stdlib's abs if encountered
 #ifdef abs
@@ -20,10 +17,9 @@
 #endif
 
 constexpr int32_t kPistonReady_micros = 10000000;
-constexpr float kBaseRate_PwmDc = 0.5;
+constexpr float kBaseRate_PwmDc = 0.4;
 constexpr float kMinRate_PwmDc = 0;
-constexpr float kMaxRate_PwmDc = 0.8;
-constexpr float kMaxAccel_PwmDc_s = 1; 
+constexpr float kMaxRate_PwmDc = 0.7;
 constexpr float kMaxCurrent_A = 15;
 constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
@@ -151,18 +147,12 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         transition_to_operational_ = false;
         for (int i = 0; i < 2; ++i) {
           output->motor_pwm[0] = 0;
-        }   
-        Bluetooth.println("Reset operational");   
+        }  
       }
 
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
       if (!maybe_line.valid) {
-        char float_buf[10];
-        dtostrf(maybe_line.value.std_dev, 7, 3, float_buf);
-        char buf[30];
-        sprintf(buf, "Line error %s", float_buf);            
-        Bluetooth.println(buf);
         state_ = State::kIdle;
         break;
       }
@@ -176,14 +166,12 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       }
       if (overcurrent) {
         state_ = State::kIdle;
-        Bluetooth.println("Overcurrent"); 
         break;
       }
 
       // Check for obstacles.
       if (obstacle_present_.output()) {
         state_ = State::kOperationalPause;
-        Bluetooth.println("Obstacle detected"); 
         break;
       } 
 
@@ -196,14 +184,12 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       last_error_ = error;
 
       // Update motor output.
-      const float max_pwm_delta = kMaxAccel_PwmDc_s * dt_s; // Limit accel.
-      const float max_pwm[2] = {
-        min(kMaxRate_PwmDc, output->motor_pwm[0] + max_pwm_delta),
-        min(kMaxRate_PwmDc, output->motor_pwm[1] + max_pwm_delta)};
       output->motor_pwm[0] = 
-        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, kMaxRate_PwmDc);
+        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, 
+          kMaxRate_PwmDc);
       output->motor_pwm[1] =
-        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc,kMaxRate_PwmDc);
+        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, 
+          kMaxRate_PwmDc);
       output->motor_enable = true;
 
       break;
@@ -217,7 +203,6 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       // Check for obstacles.
       if (!obstacle_present_.output()) {
         state_ = State::kOperational;
-        Bluetooth.println("Back to operational"); 
         break;
       } 
       break;
