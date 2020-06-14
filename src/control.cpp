@@ -23,8 +23,8 @@ constexpr int32_t kPistonReady_micros = 10000000;
 constexpr float kBaseRate_PwmDc = 0.5;
 constexpr float kMinRate_PwmDc = 0;
 constexpr float kMaxRate_PwmDc = 0.8;
-constexpr float kMaxAccel_PwmDc_s = 0.5; 
-constexpr float kMaxCurrent_A = 1000;
+constexpr float kMaxAccel_PwmDc_s = 1; 
+constexpr float kMaxCurrent_A = 15;
 constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
 constexpr float kLineCentered_mm = 62.5;
@@ -201,9 +201,9 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         min(kMaxRate_PwmDc, output->motor_pwm[0] + max_pwm_delta),
         min(kMaxRate_PwmDc, output->motor_pwm[1] + max_pwm_delta)};
       output->motor_pwm[0] = 
-        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, kMaxRate_PwmDc);
+        ClampToRange(kBaseRate_PwmDc + pd_output, kMinRate_PwmDc, max_pwm[0]);
       output->motor_pwm[1] =
-        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, kMaxRate_PwmDc);
+        ClampToRange(kBaseRate_PwmDc - pd_output, kMinRate_PwmDc, max_pwm[1]);
       output->motor_enable = true;
 
       break;
