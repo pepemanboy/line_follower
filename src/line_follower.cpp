@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include <Arduino.h>
-
+#include "hardware.h"
 #include "control.h"
 
 constexpr uint32_t kTowerBlinkPeriod_micros = 500000;
