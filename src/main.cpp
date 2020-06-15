@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include <Arduino.h> /* import micros(). */
 #include "line_follower_startup_test.h"
 #include "line_follower.h"
 
@@ -15,8 +15,11 @@ namespace {
 
 void setup() {
   robot.Init();
+  while(1) {
+    robot.Poll(micros());
+    // delay(1);
+  }
 }
 
 void loop() {
-  robot.Poll(micros());
 }
