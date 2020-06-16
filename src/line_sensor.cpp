@@ -3,7 +3,7 @@
 #include "util.h"
 
 constexpr float kQtrSensorSeparation_mm = 12.5f;
-constexpr float kMaxQtrStdDev_mm = 90.0f;
+constexpr float kMaxQtrStdDev_mm = 30.0f;
 constexpr float kAdcThreshold = 300;
 
 namespace line_follower {
