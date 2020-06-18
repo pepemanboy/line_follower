@@ -80,18 +80,17 @@ void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
       break;
     case Control::State::kOperationalPause:
       red = true;
-      sound = false;
       break;
     case Control::State::kError:
       green = toggle_state;
       yellow = toggle_state;
       red = toggle_state;
-      sound = false;
+      sound = toggle_state;
   }
   SetTowerLight(TowerLight::Red, red);
   SetTowerLight(TowerLight::Green, green);
   SetTowerLight(TowerLight::Yellow, yellow);
-  SetTowerSound(/*sound*/ false);
+  SetTowerSound(sound);
 }
 
 }  // namespace line_follower
