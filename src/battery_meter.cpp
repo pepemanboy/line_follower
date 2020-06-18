@@ -4,7 +4,7 @@
 
 namespace line_follower {
 
-constexpr float kSampleToV = kAdcRef_V / kAdcResolution * ( 1.0 + 4.7);
+constexpr float kSampleToV = kAdcRef_V / (float)kAdcResolution * ( 1.0 + 4.7);
 constexpr float kFilterWeight = 0.3f;
 constexpr float kDefault_V = 12.0f;
 
