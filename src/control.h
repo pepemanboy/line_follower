@@ -6,6 +6,7 @@
 #include "line_sensor.h"
 #include "sample_hold.h"
 #include "hardware.h"
+#include "battery_meter.h"
 
 namespace line_follower {
 
@@ -18,6 +19,7 @@ public:
     kReady,
     kOperational,
     kOperationalPause,
+    kError,
   };
   
   struct ControlOutput {
@@ -46,6 +48,9 @@ private:
   bool IsLineSensorCentered();
   LineSensor line_sensor_ = {};
   SampleHold obstacle_present_;
+
+  BatteryMeter battery_meter_;
+  bool low_battery_;
 
   State state_;
   State last_state_;

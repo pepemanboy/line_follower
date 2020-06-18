@@ -24,6 +24,7 @@ constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
 constexpr float kLineCentered_mm = 62.5;
 constexpr int32_t kObstaclePresentHold_micros = 1100000;
+constexpr float kMinBattery_V = 12;
 
 namespace line_follower {
 
@@ -36,6 +37,8 @@ Control::Control():
 
 void Control::Reset() {
   line_sensor_.Reset();
+  battery_meter_.Reset();
+  low_battery_ = false;
 
   state_ = State::kIdle;
   last_state_ = State::kIdle;
@@ -52,6 +55,10 @@ void Control::Poll(uint32_t micros, ControlOutput *output) {
   ReadQtrSensors(qtr_readings);
   line_sensor_.OnQtrArrayReading(qtr_readings);
 
+  // Read battery meter.
+  battery_meter_.OnAnalogSample(ReadBatteryMeter());
+  low_battery_ = battery_meter_.Output_V() <= kMinBattery_V;
+
   // Read range sensor.
   obstacle_present_.OnDigitalRead(micros, ReadRangeSensor());
 
@@ -59,7 +66,8 @@ void Control::Poll(uint32_t micros, ControlOutput *output) {
 }
 
 void Control::TransitionDown() {
-  if (last_state_ > State::kIdleReady) {
+  if (last_state_ > State::kIdleReady &&
+      last_state_ != State::kError) {
     state_ = State::kIdle;
   }
 }
@@ -92,18 +100,30 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
   // FSM.
   switch(state_) {
     case State::kIdle:
+      if (new_state) {
+        battery_meter_.Reset();
+      }
+      if (low_battery_) {
+        state_ = State::kError;
+        break;
+      }
       transition_to_operational_ = false;
       output->motor_enable = false;
       output->piston_state = PistonState::Up;
-      last_idle_micros_ = micros;
+      last_idle_micros_ = micros;      
+      
       if (IsLineSensorCentered()) {
         state_ = State::kIdleReady;
       }
       break;
     case State::kIdleReady:
+      if (low_battery_) {
+        state_ = State::kError;
+        break;
+      }
       output->motor_enable = false;
       output->piston_state = PistonState::Up;
-      last_idle_micros_ = micros;
+      last_idle_micros_ = micros;      
       if (!IsLineSensorCentered()) {
         state_ = State::kIdle;
       } else if (transition_to_operational_) {
@@ -182,6 +202,12 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
         state_ = State::kOperational;
         break;
       } 
+      break;
+    }
+    case State::kError: {      
+      // Unrecoverable.
+      output->motor_enable = false;
+      output->piston_state = PistonState::Up;
       break;
     }
   }

@@ -82,6 +82,11 @@ void LineFollower::UpdateTower(uint32_t micros, Control::State state) {
       red = true;
       sound = false;
       break;
+    case Control::State::kError:
+      green = toggle_state;
+      yellow = toggle_state;
+      red = toggle_state;
+      sound = false;
   }
   SetTowerLight(TowerLight::Red, red);
   SetTowerLight(TowerLight::Green, green);
