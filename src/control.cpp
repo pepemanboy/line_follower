@@ -99,14 +99,7 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
 
   // FSM.
   switch(state_) {
-    case State::kIdle:
-      if (new_state) {
-        battery_meter_.Reset();
-      }
-      if (low_battery_) {
-        state_ = State::kError;
-        break;
-      }
+    case State::kIdle:      
       transition_to_operational_ = false;
       output->motor_enable = false;
       output->piston_state = PistonState::Up;
@@ -131,6 +124,10 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       }
       break;
     case State::kWaitForReady: {
+      if (low_battery_) {
+        state_ = State::kError;
+        break;
+      }
       output->motor_enable = false;
       output->piston_state = PistonState::Down;
       if (micros - last_idle_micros_ < kPistonReady_micros) {
