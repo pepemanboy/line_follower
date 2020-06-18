@@ -5,7 +5,7 @@
 namespace line_follower {
 
 constexpr float kSampleToV = kAdcRef_V / (float)kAdcResolution * ( 1.0 + 4.7);
-constexpr float kFilterWeight = 0.3f;
+constexpr float kFilterWeight = 0.01f;
 constexpr float kDefault_V = 12.0f;
 
 BatteryMeter::BatteryMeter(): filter_V_(kDefault_V, kFilterWeight) {
@@ -17,7 +17,8 @@ void BatteryMeter::Reset() {
 }
 
 void BatteryMeter::OnAnalogSample(int32_t analog_sample) {
-  const float sample_V = analog_sample * kSampleToV;
+  // const float sample_V = analog_sample * kSampleToV;
+  const float sample_V = analog_sample * 0.0178 + 4.2;  // Calibrated.
   filter_V_.Update(sample_V);
 }
 
