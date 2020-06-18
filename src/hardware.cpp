@@ -12,9 +12,7 @@ void HardwareInit() {
     pinMode(kQtrSensorPins[i], INPUT);
   }
 
-  for (int i = 0; i < kNumCurrentSensors; ++i) {
-    pinMode(kCurrentSensorPins[i], INPUT);
-  }
+  pinMode(kBatteryMeterPin, INPUT);
 
   pinMode(kLedGreenPin, OUTPUT);
   pinMode(kLedRedPin, OUTPUT);
@@ -59,10 +57,8 @@ void ReadQtrSensors(int32_t readings[kNumQtrSensors]) {
   }
 }
 
-void ReadCurrentSensors(int32_t readings[kNumCurrentSensors]) {
-  for (int i = 0; i < kNumCurrentSensors; ++i) {
-    readings[i] = analogRead(kCurrentSensorPins[i]);
-  }
+int32_t ReadBatteryMeter() {
+  return analogRead(kBatteryMeterPin);
 }
 
 bool ReadButton(Button button) {

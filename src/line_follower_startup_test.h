@@ -16,13 +16,13 @@ public:
 private:
   void StartupTest();
   void LineSensorsTest();
-  void CurrentSensorsTest();
   void ButtonsTest();
   void LineFollowerTest();
   void AdjustPidKp();
   void AdjustPidKd();
   void RangeSensorTest();
   void MotorsTest();
+  void BatteryMeterTest();
 
   float ReadBluetoothFloat();
   int ReadBluetoothInt();

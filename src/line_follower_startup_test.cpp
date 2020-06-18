@@ -6,9 +6,9 @@
 #include "hardware.h"
 #include "util.h"
 #include "line_sensor.h"
-#include "current_sensor.h"
 #include "button_debounce.h"
 #include "line_follower.h"
+#include "battery_meter.h"
 
 #define Bluetooth Serial2
 
@@ -109,14 +109,11 @@ void LineFollowerStartupTest::StartupTest() {
       Bluetooth.println(buf);
     }
 
-    Bluetooth.println("Current sensors:");
-    int32_t current_sensors[kNumCurrentSensors];
-    ReadCurrentSensors(current_sensors);
-    for (int i = 0; i < kNumCurrentSensors; ++i) {
-      char buf[20];
-      sprintf(buf, "CS%d = %d", i, (int)current_sensors[i]);
-      Bluetooth.println(buf);
-    }
+    Bluetooth.println("Battery meter:");
+    int battery_meter_reading = ReadBatteryMeter();
+    char buf[20];
+    sprintf(buf, "VBat. %d ADC", battery_meter_reading);
+    Bluetooth.println(buf);
 
     Bluetooth.println("Buttons:");
     {
@@ -200,47 +197,6 @@ void LineFollowerStartupTest::LineSensorsTest() {
   Bluetooth.read();
 
   SetPiston(PistonState::Up);
-}
-
-void LineFollowerStartupTest::CurrentSensorsTest() {
-  Bluetooth.println("Current sensors test!");
-  CurrentSensor current_sensors[kNumCurrentSensors];
-
-  TESTPROMPTRETURN("Piston down");
-  SetPiston(PistonState::Down);
-  delay(10000);
-  SetPiston(PistonState::Idle);
-
-  TESTPROMPTRETURN("Drive forward");
-  EnableMotor(Motor::Left, true);
-  EnableMotor(Motor::Right, true);
-  SetMotorPwm(Motor::Left, 200);
-  SetMotorPwm(Motor::Right, 200);  
-
-  while(!Bluetooth.available()) {
-    Bluetooth.println("Current sensors:");
-    int32_t current_readings[kNumCurrentSensors];
-    ReadCurrentSensors(current_readings);
-    for (int i = 0; i < kNumCurrentSensors; ++i) {
-      current_sensors[i].OnAnalogSample(current_readings[i]);
-    }
-
-    for (int i = 0; i < kNumCurrentSensors; ++i) {
-      char buf[30];
-      sprintf(buf, "CS%d = %d, %d", i, 
-              (int)current_readings[i], 
-              (int)current_sensors[i].Output_Amps());
-      Bluetooth.println(buf);
-    }
-
-    Bluetooth.println();
-    Bluetooth.println();
-    delay(1000);
-  }
-
-  EnableMotor(Motor::Left, false);
-  EnableMotor(Motor::Right, false);
-  Bluetooth.read();
 }
 
 void LineFollowerStartupTest::ButtonsTest() {
@@ -470,7 +426,16 @@ void LineFollowerStartupTest::MotorsTest() {
       break;
   }
 
+  BatteryMeter meter_;
+
   while(!Bluetooth.available()) {
+    meter_.OnAnalogSample(ReadBatteryMeter());
+    char float_str[20];
+    dtostrf(meter_.Output_V(), 7, 4, float_str);
+    char buf[50];
+    sprintf(buf, "Battery: %s V", float_str);
+    Bluetooth.println(buf);
+
     delay(100);
   }
   read = Bluetooth.read();
@@ -479,6 +444,27 @@ void LineFollowerStartupTest::MotorsTest() {
   EnableMotor(Motor::Right, false);
   SetMotorPwm(Motor::Left, 0);
   SetMotorPwm(Motor::Right, 0);
+}
+
+void LineFollowerStartupTest::BatteryMeterTest() {
+  BatteryMeter meter_;
+  
+  while(!Bluetooth.available()) {
+    meter_.OnAnalogSample(ReadBatteryMeter());
+
+    static int loop_counter = 0;
+    if (loop_counter++ > 500) {
+      loop_counter = 0;
+      char float_str[20];
+      dtostrf(meter_.Output_V(), 7, 4, float_str);
+      char buf[50];
+      sprintf(buf, "Battery: %s V", float_str);
+      Bluetooth.println(buf);
+    }
+   
+    delay(1);
+  }
+  Bluetooth.read();
 }
 
 void LineFollowerStartupTest::Init() {
@@ -492,25 +478,25 @@ void LineFollowerStartupTest::Poll(uint32_t micros) {
   Bluetooth.println("Welcome to the test");
   Bluetooth.println("Startup test: Press 1");
   Bluetooth.println("Line sensors test: Press 2");
-  Bluetooth.println("Current sensors test: Press 3");
+  Bluetooth.println("Battery meter test: Press 3");
   Bluetooth.println("Buttons test: Press 4");
   Bluetooth.println("Line follower test: Press 5");
   Bluetooth.println("Adjust PID Kp: Press 6");
   Bluetooth.println("Adjust PID Kd: Press 7");
   Bluetooth.println("Range sensor test: Press 8");
   Bluetooth.println("Motors test: Press 9");
-  int option = TestPrompt("Choose a test") - (int)'0';
+  char option = TestPrompt("Choose a test");
 
   switch(option) {
-    case 1: StartupTest(); break;
-    case 2: LineSensorsTest(); break;
-    case 3: CurrentSensorsTest(); break;
-    case 4: ButtonsTest(); break;
-    case 5: LineFollowerTest(); break;
-    case 6: AdjustPidKp(); break;
-    case 7: AdjustPidKd(); break;
-    case 8: RangeSensorTest(); break;
-    case 9: MotorsTest(); break;
+    case '1': StartupTest(); break;
+    case '2': LineSensorsTest(); break;
+    case '3': BatteryMeterTest(); break;
+    case '4': ButtonsTest(); break;
+    case '5': LineFollowerTest(); break;
+    case '6': AdjustPidKp(); break;
+    case '7': AdjustPidKd(); break;
+    case '8': RangeSensorTest(); break;
+    case '9': MotorsTest(); break;
     default:
       Bluetooth.println("Invalid option");
       break;

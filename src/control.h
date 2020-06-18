@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #include "line_sensor.h"
-#include "current_sensor.h"
 #include "sample_hold.h"
 #include "hardware.h"
 
@@ -46,7 +45,6 @@ private:
   void RunStateMachine(uint32_t micros, ControlOutput *output);
   bool IsLineSensorCentered();
   LineSensor line_sensor_ = {};
-  CurrentSensor current_sensors_[kNumCurrentSensors] = {};
   SampleHold obstacle_present_;
 
   State state_;

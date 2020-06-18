@@ -20,7 +20,6 @@ constexpr int32_t kPistonReady_micros = 10000000;
 constexpr float kBaseRate_PwmDc = 0.4;
 constexpr float kMinRate_PwmDc = 0;
 constexpr float kMaxRate_PwmDc = 0.7;
-constexpr float kMaxCurrent_A = 15;
 constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
 constexpr float kLineCentered_mm = 62.5;
@@ -37,9 +36,6 @@ Control::Control():
 
 void Control::Reset() {
   line_sensor_.Reset();
-  for(int i = 0; i < kNumCurrentSensors; ++i) {
-    current_sensors_[i].Reset();
-  }
 
   state_ = State::kIdle;
   last_state_ = State::kIdle;
@@ -55,13 +51,6 @@ void Control::Poll(uint32_t micros, ControlOutput *output) {
   int32_t qtr_readings[kNumQtrSensors];
   ReadQtrSensors(qtr_readings);
   line_sensor_.OnQtrArrayReading(qtr_readings);
-
-  // Read current sensors.
-  int32_t current_readings[kNumCurrentSensors];
-  ReadCurrentSensors(current_readings);
-  for (int i = 0; i < kNumCurrentSensors; ++i) {
-    current_sensors_[i].OnAnalogSample(current_readings[i]);
-  }
 
   // Read range sensor.
   obstacle_present_.OnDigitalRead(micros, ReadRangeSensor());
@@ -153,18 +142,6 @@ void Control::RunStateMachine(uint32_t micros, ControlOutput *output) {
       // Check for valid line reading.
       const MaybeValid<Stats> maybe_line = line_sensor_.MaybeOutput_mm();
       if (!maybe_line.valid) {
-        state_ = State::kIdle;
-        break;
-      }
-      
-      // Overcurrent protection.
-      bool overcurrent = false;
-      for (int i = 0; i < kNumCurrentSensors; ++i) {
-        if (abs(current_sensors_[i].Output_Amps()) >= kMaxCurrent_A) {
-          overcurrent = true;
-        }
-      }
-      if (overcurrent) {
         state_ = State::kIdle;
         break;
       }
