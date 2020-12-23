@@ -4,7 +4,7 @@
 
 constexpr float kQtrSensorSeparation_mm = 12.5f;
 constexpr float kMaxQtrStdDev_mm = 30.0f;
-constexpr float kAdcThreshold = 300;
+constexpr float kAdcThreshold = 200;
 
 namespace line_follower {
 
