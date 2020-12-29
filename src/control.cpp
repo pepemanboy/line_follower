@@ -24,7 +24,7 @@ constexpr float kPidKp = 0.0012;
 constexpr float kPidKd = 6;
 constexpr float kLineCentered_mm = 62.5;
 constexpr int32_t kObstaclePresentHold_micros = 1100000;
-constexpr float kMinBattery_V = 12;
+constexpr float kMinBattery_V = 11.5;
 
 namespace line_follower {
 

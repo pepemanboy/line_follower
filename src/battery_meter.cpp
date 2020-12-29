@@ -5,7 +5,7 @@
 namespace line_follower {
 
 constexpr float kSampleToV = kAdcRef_V / (float)kAdcResolution * ( 1.0 + 4.7);
-constexpr float kFilterWeight = 0.01f;
+constexpr float kFilterWeight = 0.0001f;
 constexpr float kDefault_V = 13.5f;
 
 BatteryMeter::BatteryMeter(): filter_V_(kDefault_V, kFilterWeight) {
