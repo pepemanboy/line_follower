@@ -11,9 +11,7 @@ constexpr int kQtrSensorPins[kNumQtrSensors] = {
   A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13
 };
 
-constexpr int kCurrentSensorPins[kNumCurrentSensors] = {
-  A14, A15
-};
+constexpr int kBatteryMeterPin = A14;
 
 constexpr int kTowerLightRedPin = 45;
 constexpr int kTowerLightGreenPin = 43;
@@ -22,6 +20,8 @@ constexpr int kTowerSoundPin = 39;
 
 constexpr int kButtonDownPin = 51;
 constexpr int kButtonUpPin = 53;
+
+constexpr int kRangeSensorPin = 49;
 
 constexpr int kPistonPlusPin = 37;
 constexpr int kPistonMinusPin = 35;

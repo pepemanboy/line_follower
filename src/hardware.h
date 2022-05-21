@@ -36,9 +36,10 @@ enum class Led {
 
 void HardwareInit();
 
-void ReadQtrSensors(int readings[kNumQtrSensors]);
-void ReadCurrentSensors(int readings[kNumCurrentSensors]);
+void ReadQtrSensors(int32_t readings[kNumQtrSensors]);
 bool ReadButton(Button button);
+bool ReadRangeSensor();
+int32_t ReadBatteryMeter();
 
 void SetTowerLight(TowerLight light, bool state);
 void SetTowerSound(bool state);
@@ -49,9 +50,6 @@ void SetMotorPwm(Motor motor, int pwm);
 void EnableMotor(Motor motor, bool enable);
 
 void SetLed(Led led, bool state);
-
-
-
 
 }  // namespace line_follower
 

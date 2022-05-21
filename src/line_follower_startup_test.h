@@ -12,6 +12,23 @@ public:
   void Init();
 
   void Poll(uint32_t micros);
+
+private:
+  void StartupTest();
+  void LineSensorsTest();
+  void ButtonsTest();
+  void LineFollowerTest();
+  void AdjustPidKp();
+  void AdjustPidKd();
+  void RangeSensorTest();
+  void MotorsTest();
+  void BatteryMeterTest();
+
+  float ReadBluetoothFloat();
+  int ReadBluetoothInt();
+
+  float pid_kp_ = -1;
+  float pid_kd_ = -1;
 };
 
 }  // namespace line_follower

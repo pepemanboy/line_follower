@@ -12,9 +12,7 @@ void HardwareInit() {
     pinMode(kQtrSensorPins[i], INPUT);
   }
 
-  for (int i = 0; i < kNumCurrentSensors; ++i) {
-    pinMode(kCurrentSensorPins[i], INPUT);
-  }
+  pinMode(kBatteryMeterPin, INPUT);
 
   pinMode(kLedGreenPin, OUTPUT);
   pinMode(kLedRedPin, OUTPUT);
@@ -34,6 +32,8 @@ void HardwareInit() {
   pinMode(kButtonUpPin, INPUT);
   pinMode(kButtonDownPin, INPUT);
 
+  pinMode(kRangeSensorPin, INPUT);
+
   pinMode(kPistonPlusPin, OUTPUT);
   pinMode(kPistonMinusPin, OUTPUT);
   SetPiston(PistonState::Idle);
@@ -51,16 +51,14 @@ void HardwareInit() {
   EnableMotor(Motor::Right, false);
 }
 
-void ReadQtrSensors(int readings[kNumQtrSensors]) {
+void ReadQtrSensors(int32_t readings[kNumQtrSensors]) {
   for (int i = 0; i < kNumQtrSensors; ++i) {
-    readings[i] = analogRead(kQtrSensorPins[i]);
+    readings[i] = kAdcResolution - analogRead(kQtrSensorPins[i]);
   }
 }
 
-void ReadCurrentSensors(int readings[kNumCurrentSensors]) {
-  for (int i = 0; i < kNumCurrentSensors; ++i) {
-    readings[i] = analogRead(kCurrentSensorPins[i]);
-  }
+int32_t ReadBatteryMeter() {
+  return analogRead(kBatteryMeterPin);
 }
 
 bool ReadButton(Button button) {
@@ -69,6 +67,10 @@ bool ReadButton(Button button) {
     case Button::Down: return !digitalRead(kButtonDownPin);
   }
   return false;  // Shall never get here.
+}
+
+bool ReadRangeSensor() {
+  return !digitalRead(kRangeSensorPin);
 }
 
 void SetTowerLight(TowerLight light, bool state) {
@@ -144,10 +146,5 @@ void SetLed(Led led, bool state) {
     case Led::Red: digitalWrite(kLedRedPin, state); break;
   }
 }
-
-
-
-
-
 
 }  // namespace line_follower
